@@ -1,3 +1,4 @@
+
 # import streamlit as st
 # import pandas as pd
 # from utils.db_helper import fetch_data, insert_data, update_data
@@ -28,29 +29,106 @@
 #                     "seats_available": seats, "batch_size": batch
 #                 })
 #                 st.success("Program Added!")
-#         st.dataframe(pd.DataFrame(fetch_data("programs_planned")))
+        
+#         planned_data = fetch_data("programs_planned")
+#         if planned_data:
+#             st.dataframe(pd.DataFrame(planned_data))
 
 #     with tab2:
 #         st.subheader("Manage Running Programs")
-#         # Similar form as tab1 but for `programs_running`
-#         st.dataframe(pd.DataFrame(fetch_data("programs_running")))
+#         with st.form("add_running"):
+#             col1, col2 = st.columns(2)
+#             name = col1.text_input("Course Name")
+#             duration = col1.text_input("Duration")
+#             skills = col2.text_input("Skills")
+#             link = col2.text_input("Class Link")
+#             if st.form_submit_button("Commit Changes"):
+#                 insert_data("programs_running", {
+#                     "name": name, "duration": duration, "skills": skills, "class_link": link
+#                 })
+#                 st.success("Running Program Added!")
+                
+#         running_data = fetch_data("programs_running")
+#         if running_data:
+#             st.dataframe(pd.DataFrame(running_data))
         
 #     with tab3:
 #         st.subheader("Program Coordinators")
-#         # Similar form as tab1 but for `coordinators`
-#         st.dataframe(pd.DataFrame(fetch_data("coordinators")))
+#         with st.form("add_coordinator"):
+#             col1, col2 = st.columns(2)
+#             prog_name = col1.text_input("Program Name")
+#             name = col2.text_input("Coordinator Name")
+#             email = col1.text_input("Email Id")
+#             phone = col2.text_input("Phone Number")
+#             exp = col1.text_input("Experience")
+#             cv = col2.text_input("CV Link")
+#             linkedin = col1.text_input("LinkedIn Profile")
+#             github = col2.text_input("GitHub Link")
+#             emp_id = col1.text_input("Employee ID")
+#             if st.form_submit_button("Commit Changes"):
+#                 insert_data("coordinators", {
+#                     "program_name": prog_name, "name": name, "email": email, "phone": phone, 
+#                     "experience": exp, "cv_link": cv, "linkedin": linkedin, "github": github, "emp_id": emp_id
+#                 })
+#                 st.success("Coordinator Added!")
+                
+#         coord_data = fetch_data("coordinators")
+#         if coord_data:
+#             st.dataframe(pd.DataFrame(coord_data))
         
 #     with tab4:
 #         st.subheader("Expert Trainer EOI & Approvals")
-#         trainers = pd.DataFrame(fetch_data("trainer_profiles"))
+#         trainers_data = fetch_data("trainer_profiles")
+#         trainers = pd.DataFrame(trainers_data)
 #         st.dataframe(trainers)
-#         # Logic to approve/reject would go here via update_data()
+        
+#         if not trainers.empty:
+#             st.divider()
+#             st.subheader("Manage Trainer Status")
+#             col1, col2, col3 = st.columns([2, 1, 1])
+#             with col1:
+#                 selected_id = st.selectbox("Select Trainer ID:", trainers['id'].tolist(), key="trainer_select")
+#             with col2:
+#                 st.write("")
+#                 st.write("")
+#                 if st.button("✅ Approve Trainer"):
+#                     update_data("trainer_profiles", "id", selected_id, {"status": "Approved"})
+#                     st.success(f"Trainer ID {selected_id} Approved!")
+#                     st.rerun()
+#             with col3:
+#                 st.write("")
+#                 st.write("")
+#                 if st.button("❌ Reject Trainer"):
+#                     update_data("trainer_profiles", "id", selected_id, {"status": "Rejected"})
+#                     st.error(f"Trainer ID {selected_id} Rejected.")
+#                     st.rerun()
         
 #     with tab5:
 #         st.subheader("Student Requests & Enrollments")
-#         reqs = pd.DataFrame(fetch_data("student_enrollments"))
-#         st.dataframe(reqs)
-#         # Logic to approve/reject student joins via update_data()
+#         enrolls_data = fetch_data("student_enrollments")
+#         enrolls = pd.DataFrame(enrolls_data)
+#         st.dataframe(enrolls)
+        
+#         if not enrolls.empty:
+#             st.divider()
+#             st.subheader("Manage Enrollment Status")
+#             col1, col2, col3 = st.columns([2, 1, 1])
+#             with col1:
+#                 sel_enroll_id = st.selectbox("Select Enrollment ID:", enrolls['id'].tolist(), key="enroll_select")
+#             with col2:
+#                 st.write("")
+#                 st.write("")
+#                 if st.button("✅ Approve Student"):
+#                     update_data("student_enrollments", "id", sel_enroll_id, {"status": "Approved"})
+#                     st.success(f"Enrollment ID {sel_enroll_id} Approved!")
+#                     st.rerun()
+#             with col3:
+#                 st.write("")
+#                 st.write("")
+#                 if st.button("❌ Reject Student"):
+#                     update_data("student_enrollments", "id", sel_enroll_id, {"status": "Rejected"})
+#                     st.error(f"Enrollment ID {sel_enroll_id} Rejected.")
+#                     st.rerun()
 import streamlit as st
 import pandas as pd
 from utils.db_helper import fetch_data, insert_data, update_data
@@ -58,8 +136,9 @@ from utils.db_helper import fetch_data, insert_data, update_data
 def render():
     st.title("⚙️ PRAGYAN AI - Admin Dashboard")
     
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
-        "Planned Programs", "Running Programs", "Coordinators", "Trainer Approvals", "Student Approvals"
+    # Added "Assign Classes" as tab6
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+        "Planned Programs", "Running Programs", "Coordinators", "Trainer Approvals", "Student Approvals", "Assign Classes"
     ])
     
     with tab1:
@@ -181,3 +260,42 @@ def render():
                     update_data("student_enrollments", "id", sel_enroll_id, {"status": "Rejected"})
                     st.error(f"Enrollment ID {sel_enroll_id} Rejected.")
                     st.rerun()
+
+    with tab6:
+        st.subheader("Assign Tasks to Approved Trainers")
+        
+        # Only fetch trainers that have been approved
+        trainers_data = fetch_data("trainer_profiles")
+        approved_trainers = [t for t in (trainers_data or []) if t.get("status") == "Approved"]
+        
+        if not approved_trainers:
+            st.warning("No approved trainers available. Please approve a trainer in Tab 4 first.")
+        else:
+            trainer_emails = [t["email"] for t in approved_trainers]
+            
+            with st.form("assign_class_form"):
+                col1, col2 = st.columns(2)
+                selected_trainer = col1.selectbox("Select Trainer (Email)", trainer_emails)
+                event_name = col2.text_input("Event / Class Name")
+                coord_name = col1.text_input("Coordinator Name")
+                class_date = col2.text_input("Date (YYYY-MM-DD)")
+                class_time = col1.text_input("Time (e.g., 10:00 AM)")
+                
+                if st.form_submit_button("Assign Task"):
+                    insert_data("trainer_classes", {
+                        "trainer_email": selected_trainer,
+                        "event_name": event_name,
+                        "coordinator_name": coord_name,
+                        "date": class_date,
+                        "time": class_time,
+                        "attendance": "Pending",
+                        "completed": "No",
+                        "payment_status": "Pending"
+                    })
+                    st.success(f"Class assigned successfully to {selected_trainer}!")
+            
+            st.divider()
+            st.subheader("Current Assignments")
+            assigned_data = fetch_data("trainer_classes")
+            if assigned_data:
+                st.dataframe(pd.DataFrame(assigned_data))
