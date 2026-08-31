@@ -42,27 +42,68 @@ def render():
             st.rerun()
 
     if has_accepted_proposal:
-        with tab3:
-            st.subheader("Programs in Planning Stage")
-            planned = pd.DataFrame(fetch_data("programs_planned"))
+    #     with tab3:
+    #         st.subheader("Programs in Planning Stage")
+    #         planned = pd.DataFrame(fetch_data("programs_planned"))
+    #         st.dataframe(planned)
+    #         selected_prog = st.selectbox("Select Program ID to Join", planned['id'].tolist() if not planned.empty else [])
+    #         if st.button("Join Program"):
+    #             insert_data("student_enrollments", {"student_email": st.session_state.user_email, "program_id": selected_prog, "status": "Pending"})
+    #             st.success("Join request sent to Admin!")
+                
+    #     with tab4:
+    #         st.subheader("Programs I Joined (Yet to start)")
+    #         enrolls = pd.DataFrame(fetch_data("student_enrollments"))
+    #         if not enrolls.empty:
+    #             my_enrolls = enrolls[enrolls['student_email'] == st.session_state.user_email]
+    #             st.dataframe(my_enrolls)
+                
+    #     with tab5:
+    #         st.subheader("Currently Running Programs")
+    #         running = pd.DataFrame(fetch_data("programs_running"))
+    #         st.dataframe(running)
+    # else:
+    #     for t in [tab3, tab4, tab5]:
+    #         with t:
+    #             st.warning("Please submit and accept a proposal in Tab 2 to view this section.")
+with tab3:
+        st.subheader("Programs in Planning Stage")
+        planned_data = fetch_data("programs_planned")
+        planned = pd.DataFrame(planned_data)
+        
+        if not planned.empty:
             st.dataframe(planned)
-            selected_prog = st.selectbox("Select Program ID to Join", planned['id'].tolist() if not planned.empty else [])
+            selected_prog = st.selectbox("Select Program ID to Join", planned['id'].tolist())
             if st.button("Join Program"):
-                insert_data("student_enrollments", {"student_email": st.session_state.user_email, "program_id": selected_prog, "status": "Pending"})
+                insert_data("student_enrollments", {
+                    "student_email": st.session_state.user_email, 
+                    "program_id": selected_prog, 
+                    "status": "Pending"
+                })
                 st.success("Join request sent to Admin!")
-                
-        with tab4:
-            st.subheader("Programs I Joined (Yet to start)")
-            enrolls = pd.DataFrame(fetch_data("student_enrollments"))
-            if not enrolls.empty:
-                my_enrolls = enrolls[enrolls['student_email'] == st.session_state.user_email]
+        else:
+            st.info("No planned programs are available right now.")
+            
+    with tab4:
+        st.subheader("Programs I Joined (Yet to start)")
+        enrolls_data = fetch_data("student_enrollments")
+        enrolls = pd.DataFrame(enrolls_data)
+        
+        if not enrolls.empty:
+            my_enrolls = enrolls[enrolls['student_email'] == st.session_state.user_email]
+            if not my_enrolls.empty:
                 st.dataframe(my_enrolls)
-                
-        with tab5:
-            st.subheader("Currently Running Programs")
-            running = pd.DataFrame(fetch_data("programs_running"))
+            else:
+                st.info("You haven't joined any programs yet.")
+        else:
+            st.info("You haven't joined any programs yet.")
+            
+    with tab5:
+        st.subheader("Currently Running Programs")
+        running_data = fetch_data("programs_running")
+        running = pd.DataFrame(running_data)
+        
+        if not running.empty:
             st.dataframe(running)
-    else:
-        for t in [tab3, tab4, tab5]:
-            with t:
-                st.warning("Please submit and accept a proposal in Tab 2 to view this section.")
+        else:
+            st.info("No programs are currently running.")
