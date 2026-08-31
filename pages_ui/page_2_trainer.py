@@ -22,12 +22,25 @@ def render():
         st.subheader("Step 3: Submit Expression of Interest (EOI)")
         with st.form("eoi_form"):
             topic = st.text_input("Topic")
-            price = st.number_input("Expected Price")
+            # Enforce integer values on the frontend using step=1
+            price = st.number_input("Expected Price", min_value=0, step=1)
             slot = st.text_input("Timing Slot")
             if st.form_submit_button("Submit EOI"):
-                insert_data("trainer_eoi", {"trainer_email": st.session_state.user_email, "topic": topic, "price": price, "time_slot": slot, "status": "Pending"})
+                # Explicitly cast to int() for the backend database insertion
+                insert_data("trainer_eoi", {"trainer_email": st.session_state.user_email, "topic": topic, "price": int(price), "time_slot": slot, "status": "Pending"})
                 st.success("EOI Submitted!")
                 
+        # st.subheader("Step 3: Submit Expression of Interest (EOI)")
+        # with st.form("eoi_form"):
+        #     topic = st.text_input("Topic")
+        #     price = st.number_input("Expected Price")
+        #     slot = st.text_input("Timing Slot")
+        #     if st.form_submit_button("Submit EOI"):
+        #         insert_data("trainer_eoi", {"trainer_email": st.session_state.user_email, "topic": topic, "price": price, "time_slot": slot, "status": "Pending"})
+        #         st.success("EOI Submitted!")
+
+
+    
     with tab2:
         st.subheader("Current Skill Programs Needed")
         skills_list = ["Aptitude", "Communication", "DSA", "AI", "Data Science", "BI", "Machine Learning", "Deep Learning", "NLP", "LLM", "Computer Vision", "Data Analysis"]
