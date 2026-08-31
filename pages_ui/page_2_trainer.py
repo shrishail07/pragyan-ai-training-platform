@@ -49,14 +49,23 @@ def render():
             
     with tab3:
         st.subheader("Assigned Classes (Approved Only)")
-        # Fetch status
-        profile = fetch_data("trainer_profiles")
-        my_profile = [p for p in profile if p['email'] == st.session_state.user_email]
         
-        if my_profile and my_profile[0].get('status') == "Approved":
+        # Fetch all profiles matching the logged-in email
+        all_profiles = fetch_data("trainer_profiles")
+        my_profiles = [p for p in all_profiles if p.get('email') == st.session_state.user_email]
+        
+        # Check if AT LEAST ONE of those profiles is "Approved"
+        is_approved = any(p.get('status') == "Approved" for p in my_profiles)
+        
+        if is_approved:
             classes = pd.DataFrame(fetch_data("trainer_classes"))
             if not classes.empty:
-                st.dataframe(classes[classes['trainer_email'] == st.session_state.user_email])
+                # Filter classes for this specific trainer
+                my_classes = classes[classes['trainer_email'] == st.session_state.user_email]
+                if not my_classes.empty:
+                    st.dataframe(my_classes)
+                else:
+                    st.info("No classes assigned yet.")
             else:
                 st.info("No classes assigned yet.")
         else:
