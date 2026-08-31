@@ -66,44 +66,44 @@ def render():
     #     for t in [tab3, tab4, tab5]:
     #         with t:
     #             st.warning("Please submit and accept a proposal in Tab 2 to view this section.")
-with tab3:
-        st.subheader("Programs in Planning Stage")
-        planned_data = fetch_data("programs_planned")
-        planned = pd.DataFrame(planned_data)
+     with tab3:
+             st.subheader("Programs in Planning Stage")
+             planned_data = fetch_data("programs_planned")
+             planned = pd.DataFrame(planned_data)
         
-        if not planned.empty:
-            st.dataframe(planned)
-            selected_prog = st.selectbox("Select Program ID to Join", planned['id'].tolist())
-            if st.button("Join Program"):
-                insert_data("student_enrollments", {
-                    "student_email": st.session_state.user_email, 
-                    "program_id": selected_prog, 
-                    "status": "Pending"
-                })
-                st.success("Join request sent to Admin!")
-        else:
-            st.info("No planned programs are available right now.")
+             if not planned.empty:
+                 st.dataframe(planned)
+                 selected_prog = st.selectbox("Select Program ID to Join", planned['id'].tolist())
+                 if st.button("Join Program"):
+                     insert_data("student_enrollments", {
+                         "student_email": st.session_state.user_email, 
+                         "program_id": selected_prog, 
+                         "status": "Pending"
+                     })
+                     st.success("Join request sent to Admin!")
+             else:
+                 st.info("No planned programs are available right now.")
             
-    with tab4:
-        st.subheader("Programs I Joined (Yet to start)")
-        enrolls_data = fetch_data("student_enrollments")
-        enrolls = pd.DataFrame(enrolls_data)
+         with tab4:
+             st.subheader("Programs I Joined (Yet to start)")
+             enrolls_data = fetch_data("student_enrollments")
+             enrolls = pd.DataFrame(enrolls_data)
         
-        if not enrolls.empty:
-            my_enrolls = enrolls[enrolls['student_email'] == st.session_state.user_email]
-            if not my_enrolls.empty:
-                st.dataframe(my_enrolls)
-            else:
-                st.info("You haven't joined any programs yet.")
-        else:
-            st.info("You haven't joined any programs yet.")
+             if not enrolls.empty:
+                 my_enrolls = enrolls[enrolls['student_email'] == st.session_state.user_email]
+                 if not my_enrolls.empty:
+                     st.dataframe(my_enrolls)
+                 else:
+                     st.info("You haven't joined any programs yet.")
+             else:
+                 st.info("You haven't joined any programs yet.")
             
-    with tab5:
-        st.subheader("Currently Running Programs")
-        running_data = fetch_data("programs_running")
-        running = pd.DataFrame(running_data)
+         with tab5:
+             st.subheader("Currently Running Programs")
+             running_data = fetch_data("programs_running")
+             running = pd.DataFrame(running_data)
         
-        if not running.empty:
-            st.dataframe(running)
-        else:
-            st.info("No programs are currently running.")
+             if not running.empty:
+                 st.dataframe(running)
+             else:
+                 st.info("No programs are currently running.")
