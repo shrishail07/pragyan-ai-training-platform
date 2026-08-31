@@ -235,25 +235,53 @@ def render():
                     st.rerun()
         
     with tab5:
-        st.subheader("Student Requests & Enrollments")
+        st.subheader("Student Custom Requests")
+        custom_reqs_data = fetch_data("student_custom_requests")
+        custom_reqs = pd.DataFrame(custom_reqs_data)
+        st.dataframe(custom_reqs)
+        
+        if not custom_reqs.empty:
+            st.write("---")
+            st.write("**Manage Custom Request Proposals**")
+            col1, col2, col3 = st.columns([2, 1, 1])
+            with col1:
+                sel_req_id = st.selectbox("Select Request ID:", custom_reqs['id'].tolist(), key="req_select")
+            with col2:
+                st.write("")
+                st.write("")
+                if st.button("✅ Send Proposal"):
+                    update_data("student_custom_requests", "id", sel_req_id, {"status": "Proposal Sent"})
+                    st.success(f"Proposal sent for Request ID {sel_req_id}!")
+                    st.rerun()
+            with col3:
+                st.write("")
+                st.write("")
+                if st.button("❌ Reject Request"):
+                    update_data("student_custom_requests", "id", sel_req_id, {"status": "Rejected"})
+                    st.error(f"Request ID {sel_req_id} Rejected.")
+                    st.rerun()
+
+        st.divider()
+        
+        st.subheader("Student Program Enrollments")
         enrolls_data = fetch_data("student_enrollments")
         enrolls = pd.DataFrame(enrolls_data)
         st.dataframe(enrolls)
         
         if not enrolls.empty:
-            st.divider()
-            st.subheader("Manage Enrollment Status")
-            col1, col2, col3 = st.columns([2, 1, 1])
-            with col1:
+            st.write("---")
+            st.write("**Manage Enrollment Status**")
+            col4, col5, col6 = st.columns([2, 1, 1])
+            with col4:
                 sel_enroll_id = st.selectbox("Select Enrollment ID:", enrolls['id'].tolist(), key="enroll_select")
-            with col2:
+            with col5:
                 st.write("")
                 st.write("")
                 if st.button("✅ Approve Student"):
                     update_data("student_enrollments", "id", sel_enroll_id, {"status": "Approved"})
                     st.success(f"Enrollment ID {sel_enroll_id} Approved!")
                     st.rerun()
-            with col3:
+            with col6:
                 st.write("")
                 st.write("")
                 if st.button("❌ Reject Student"):
