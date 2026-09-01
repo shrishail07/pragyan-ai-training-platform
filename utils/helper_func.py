@@ -1,4 +1,3 @@
-@st.cache_resource
 def admin_filter(
     trainers_data,
     fil_by_name: str | None = None,
