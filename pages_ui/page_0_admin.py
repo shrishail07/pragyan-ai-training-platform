@@ -115,7 +115,7 @@ def render():
         fil_by_skill = st.text_input("Filter by Skill:")
 
         # 2. Run the function when the user interacts
-        result_df = admin_filter(trainers_data, fil_by_name, fil_by_email,fil_by_skill)
+        result_df = admin_filter(trainers, fil_by_name, fil_by_email,fil_by_skill)
         st.dataframe(result_df)
         
     with tab5:
