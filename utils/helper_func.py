@@ -1,8 +1,8 @@
 def admin_filter(
     trainers_data,
-    fil_by_name: str | None = None,
-    fil_by_email: str | None = None,
-    fil_by_skill: str | None = None
+    fil_by_name = None,
+    fil_by_email = None,
+    fil_by_skill = None
 ):
 
     if fil_by_name:
