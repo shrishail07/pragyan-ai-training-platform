@@ -108,6 +108,9 @@ def render():
 
         trainers_data1 = fetch_data("trainer_profiles")
         trainers1 = pd.DataFrame(trainers_data1)
+        st.subheader("Current Expert Trainers")
+        df=trainers1[trainers1["stattus"]=="Approved"]
+        st.dataframe(df)
         
         st.subheader("You Can Filter The Data By (Name, Email, Skill)")
 
