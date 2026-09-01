@@ -79,7 +79,7 @@ def render():
             st.dataframe(pd.DataFrame(coord_data))
         
     with tab4:
-        st.subheader("Expert Trainer EOI & Approvals")
+        st.subheader("1.Expert Trainer EOI & Approvals")
         trainers_data = fetch_data("trainer_profiles")
         st.markdown("ALL Expert Trainer EOI & Approvals Data")
         trainers = pd.DataFrame(trainers_data)
@@ -109,7 +109,7 @@ def render():
         trainers_data1 = fetch_data("trainer_profiles")
         trainers1 = pd.DataFrame(trainers_data1)
         
-        st.subheader("You Can Filter The Data By (Name, Email, Skill)")
+        st.subheader("2.You Can Filter The Data By (Name, Email, Skill)")
 
         fil_by_name = st.text_input("Filter by Name:")
         fil_by_email = st.text_input("Filter by Email:")
