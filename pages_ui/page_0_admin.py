@@ -84,6 +84,7 @@ def render():
         st.markdown("ALL Expert Trainer EOI & Approvals Data")
         trainers = pd.DataFrame(trainers_data)
         st.dataframe(trainers)
+        st.write(type(trainers))
 
         if not trainers.empty:
             st.divider()
