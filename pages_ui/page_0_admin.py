@@ -109,9 +109,6 @@ def render():
         trainers_data1 = fetch_data("trainer_profiles")
         trainers1 = pd.DataFrame(trainers_data1)
         
-        st.subheader("Current Expert Trainers")
-        st.dataframe(trainers1[trainers1["stattus"]=="Approved"])
-        
         st.subheader("You Can Filter The Data By (Name, Email, Skill)")
 
         fil_by_name = st.text_input("Filter by Name:")
