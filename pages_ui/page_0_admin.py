@@ -132,7 +132,7 @@ def render():
             st.dataframe(pd.DataFrame(coord_data))
         
     with tab4:
-        st.subheader("1.Expert Trainer EOI & Approvals")
+        st.info("1.Expert Trainer EOI & Approvals")
         trainers_data = fetch_data("trainer_profiles")
         st.markdown("ALL Expert Trainer EOI & Approvals Data")
         trainers = pd.DataFrame(trainers_data)
@@ -140,7 +140,7 @@ def render():
 
         if not trainers.empty:
             st.divider()
-            st.subheader("Manage Trainer Approval Status")
+            st.warning("Manage Trainer Approval Status")
             col1, col2, col3 = st.columns([2, 1, 1])
             with col1:
                 selected_id = st.selectbox("Select Trainer ID:", trainers['id'].tolist(), key="trainer_select")
@@ -162,7 +162,7 @@ def render():
         trainers_data1 = fetch_data("trainer_profiles")
         trainers1 = pd.DataFrame(trainers_data1)
         
-        st.header("2.You Can Filter The Data By (Name, Email, Skill)")
+        st.info("2.You Can Filter The Data By (Name, Email, Skill)")
 
         fil_by_name = st.text_input("Filter by Name:")
         fil_by_email = st.text_input("Filter by Email:")
