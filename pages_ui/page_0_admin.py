@@ -109,7 +109,7 @@ def render():
         trainers_data1 = fetch_data("trainer_profiles")
         trainers1 = pd.DataFrame(trainers_data1)
         
-        st.subheader("2.You Can Filter The Data By (Name, Email, Skill)")
+        st.header("2.You Can Filter The Data By (Name, Email, Skill)")
 
         fil_by_name = st.text_input("Filter by Name:")
         fil_by_email = st.text_input("Filter by Email:")
