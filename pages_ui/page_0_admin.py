@@ -80,8 +80,11 @@ def render():
     with tab4:
         st.subheader("Expert Trainer EOI & Approvals")
         trainers_data = fetch_data("trainer_profiles")
+        st.subhedder("ALL Expert Trainer EOI & Approvals Data")
         trainers = pd.DataFrame(trainers_data)
         st.dataframe(trainers)
+        st.subhedder("Current Trainers Data :-> (Approved trainers only)")
+        st.write(trainers[trainers["status"]=="Approved")
         
         if not trainers.empty:
             st.divider()
