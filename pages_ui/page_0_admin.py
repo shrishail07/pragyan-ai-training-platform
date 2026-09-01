@@ -79,7 +79,7 @@ def render():
             st.dataframe(pd.DataFrame(coord_data))
         
     with tab4:
-        st.markdown("Expert Trainer EOI & Approvals")
+        st.subheader("Expert Trainer EOI & Approvals")
         trainers_data = fetch_data("trainer_profiles")
         st.markdown("ALL Expert Trainer EOI & Approvals Data")
         trainers = pd.DataFrame(trainers_data)
@@ -87,7 +87,7 @@ def render():
 
         if not trainers.empty:
             st.divider()
-            st.subheader("Manage Trainer Status")
+            st.subheader("Manage Trainer Approval Status")
             col1, col2, col3 = st.columns([2, 1, 1])
             with col1:
                 selected_id = st.selectbox("Select Trainer ID:", trainers['id'].tolist(), key="trainer_select")
