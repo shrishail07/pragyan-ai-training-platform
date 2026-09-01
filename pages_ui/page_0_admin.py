@@ -5,6 +5,40 @@ import pandas as pd
 from utils.db_helper import fetch_data, insert_data, update_data
 from utils.helper_func import admin_filter
 
+# def render():
+#     st.title("⚙️ PRAGYAN AI - Admin Dashboard")
+    
+#     tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+#         "Planned Programs", "Running Programs", "Coordinators", "Trainer Approvals", "Student Approvals", "Assign Classes"
+#     ])
+    
+#     with tab1:
+#         st.subheader("Manage Planned Programs")
+#         with st.form("add_planned"):
+#             col1, col2 = st.columns(2)
+#             name = col1.text_input("Program Name")
+#             skill = col1.selectbox("Skill Dept", ["Aptitude", "Data Science", "Machine Learning", "LLM"])
+#             duration = col1.number_input("Duration (Hours)", min_value=1)
+#             month = col2.text_input("Start Month")
+#             time = col2.selectbox("Time", ["Weekdays", "Weekends"])
+#             price = col2.number_input("Price (INR)", min_value=0)
+#             seats = col1.number_input("Seats Available", min_value=1)
+#             batch = col2.number_input("Planned Batch Size", min_value=1)
+#             co_ordinator = col1.text_input("Event Co-ordinator")
+#             expert_trainer = col2.text_input("Expert Trainer")
+            
+#             if st.form_submit_button("Commit Changes"):
+#                 insert_data("programs_planned", {
+#                     "name": name, "skill_dept": skill, "duration_hrs": duration, 
+#                     "start_month": month, "time_slot": time, "price": price, 
+#                     "seats_available": seats, "batch_size": batch, "Event_Co_ordinator" :co_ordinator,
+#                     "Expert_Trainer":expert_trainer
+#                 })
+#                 st.success("Program Added!")
+#         st.header("Current Running Programs")
+#         planned_data = fetch_data("programs_planned")
+#         if planned_data:
+#             st.dataframe(pd.DataFrame(planned_data))
 def render():
     st.title("⚙️ PRAGYAN AI - Admin Dashboard")
     
@@ -35,10 +69,58 @@ def render():
                     "Expert_Trainer":expert_trainer
                 })
                 st.success("Program Added!")
-        st.header("Current Running Programs")
+                
+        st.header("Current Planned Programs")
         planned_data = fetch_data("programs_planned")
+        
         if planned_data:
-            st.dataframe(pd.DataFrame(planned_data))
+            planned_df = pd.DataFrame(planned_data)
+            st.dataframe(planned_df)
+            
+            st.write("---")
+            st.write("**Modify Existing Program**")
+            
+            # Select ID outside the form to pre-fill the values dynamically
+            selected_id = st.selectbox("Select Program ID to Modify:", planned_df['id'].tolist())
+            
+            # Extract current data for the selected ID
+            current_prog = planned_df[planned_df['id'] == selected_id].iloc[0]
+            
+            # Safe index lookups for selectboxes
+            skill_opts = ["Aptitude", "Data Science", "Machine Learning", "LLM"]
+            time_opts = ["Weekdays", "Weekends"]
+            curr_skill_idx = skill_opts.index(current_prog['skill_dept']) if current_prog['skill_dept'] in skill_opts else 0
+            curr_time_idx = time_opts.index(current_prog['time_slot']) if current_prog['time_slot'] in time_opts else 0
+            
+            with st.form("update_planned_form"):
+                col_mod1, col_mod2 = st.columns(2)
+                mod_name = col_mod1.text_input("Program Name", value=current_prog['name'])
+                mod_skill = col_mod1.selectbox("Skill Dept", skill_opts, index=curr_skill_idx)
+                mod_duration = col_mod1.number_input("Duration (Hours)", min_value=1, value=int(current_prog['duration_hrs']))
+                mod_month = col_mod2.text_input("Start Month", value=current_prog['start_month'])
+                mod_time = col_mod2.selectbox("Time", time_opts, index=curr_time_idx)
+                mod_price = col_mod2.number_input("Price (INR)", min_value=0, value=int(current_prog['price']))
+                mod_seats = col_mod1.number_input("Seats Available", min_value=1, value=int(current_prog['seats_available']))
+                mod_batch = col_mod2.number_input("Planned Batch Size", min_value=1, value=int(current_prog['batch_size']))
+                mod_coord = col_mod1.text_input("Event Co-ordinator", value=current_prog.get('Event_Co_ordinator', ''))
+                mod_trainer = col_mod2.text_input("Expert Trainer", value=current_prog.get('Expert_Trainer', ''))
+                
+                if st.form_submit_button("Update Program"):
+                    update_data("programs_planned", "id", selected_id, {
+                        "name": mod_name,
+                        "skill_dept": mod_skill,
+                        "duration_hrs": mod_duration,
+                        "start_month": mod_month,
+                        "time_slot": mod_time,
+                        "price": mod_price,
+                        "seats_available": mod_seats,
+                        "batch_size": mod_batch,
+                        "Event_Co_ordinator": mod_coord,
+                        "Expert_Trainer": mod_trainer
+                    })
+                    st.success(f"Program ID {selected_id} updated successfully!")
+                    st.rerun()
+
 
     with tab2:
         st.subheader("Manage Running Programs")
