@@ -24,11 +24,15 @@ def render():
             price = col2.number_input("Price (INR)", min_value=0)
             seats = col1.number_input("Seats Available", min_value=1)
             batch = col2.number_input("Planned Batch Size", min_value=1)
+            co_ordinator = col1.text_input("Event Co-ordinator")
+            expert_trainer = col2.text_input("Expert Trainer")
+            
             if st.form_submit_button("Commit Changes"):
                 insert_data("programs_planned", {
                     "name": name, "skill_dept": skill, "duration_hrs": duration, 
                     "start_month": month, "time_slot": time, "price": price, 
-                    "seats_available": seats, "batch_size": batch
+                    "seats_available": seats, "batch_size": batch, "Event_Co_ordinator" :co_ordinator,
+                    "Expert_Trainer":expert_trainer
                 })
                 st.success("Program Added!")
         
