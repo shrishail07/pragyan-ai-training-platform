@@ -6,8 +6,9 @@
 # def render():
 #     st.title("⚙️ PRAGYAN AI - Admin Dashboard")
     
-#     tab1, tab2, tab3, tab4, tab5 = st.tabs([
-#         "Planned Programs", "Running Programs", "Coordinators", "Trainer Approvals", "Student Approvals"
+#     # Added "Assign Classes" as tab6
+#     tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+#         "Planned Programs", "Running Programs", "Coordinators", "Trainer Approvals", "Student Approvals", "Assign Classes"
 #     ])
     
 #     with tab1:
@@ -104,31 +105,99 @@
 #                     st.rerun()
         
 #     with tab5:
-#         st.subheader("Student Requests & Enrollments")
+#         st.subheader("Student Custom Requests")
+#         custom_reqs_data = fetch_data("student_custom_requests")
+#         custom_reqs = pd.DataFrame(custom_reqs_data)
+#         st.dataframe(custom_reqs)
+        
+#         if not custom_reqs.empty:
+#             st.write("---")
+#             st.write("**Manage Custom Request Proposals**")
+#             col1, col2, col3 = st.columns([2, 1, 1])
+#             with col1:
+#                 sel_req_id = st.selectbox("Select Request ID:", custom_reqs['id'].tolist(), key="req_select")
+#             with col2:
+#                 st.write("")
+#                 st.write("")
+#                 if st.button("✅ Send Proposal"):
+#                     update_data("student_custom_requests", "id", sel_req_id, {"status": "Proposal Sent"})
+#                     st.success(f"Proposal sent for Request ID {sel_req_id}!")
+#                     st.rerun()
+#             with col3:
+#                 st.write("")
+#                 st.write("")
+#                 if st.button("❌ Reject Request"):
+#                     update_data("student_custom_requests", "id", sel_req_id, {"status": "Rejected"})
+#                     st.error(f"Request ID {sel_req_id} Rejected.")
+#                     st.rerun()
+
+#         st.divider()
+        
+#         st.subheader("Student Program Enrollments")
 #         enrolls_data = fetch_data("student_enrollments")
 #         enrolls = pd.DataFrame(enrolls_data)
 #         st.dataframe(enrolls)
         
 #         if not enrolls.empty:
-#             st.divider()
-#             st.subheader("Manage Enrollment Status")
-#             col1, col2, col3 = st.columns([2, 1, 1])
-#             with col1:
+#             st.write("---")
+#             st.write("**Manage Enrollment Status**")
+#             col4, col5, col6 = st.columns([2, 1, 1])
+#             with col4:
 #                 sel_enroll_id = st.selectbox("Select Enrollment ID:", enrolls['id'].tolist(), key="enroll_select")
-#             with col2:
+#             with col5:
 #                 st.write("")
 #                 st.write("")
 #                 if st.button("✅ Approve Student"):
 #                     update_data("student_enrollments", "id", sel_enroll_id, {"status": "Approved"})
 #                     st.success(f"Enrollment ID {sel_enroll_id} Approved!")
 #                     st.rerun()
-#             with col3:
+#             with col6:
 #                 st.write("")
 #                 st.write("")
 #                 if st.button("❌ Reject Student"):
 #                     update_data("student_enrollments", "id", sel_enroll_id, {"status": "Rejected"})
 #                     st.error(f"Enrollment ID {sel_enroll_id} Rejected.")
 #                     st.rerun()
+
+#     with tab6:
+#         st.subheader("Assign Tasks to Approved Trainers")
+        
+#         # Only fetch trainers that have been approved
+#         trainers_data = fetch_data("trainer_profiles")
+#         approved_trainers = [t for t in (trainers_data or []) if t.get("status") == "Approved"]
+        
+#         if not approved_trainers:
+#             st.warning("No approved trainers available. Please approve a trainer in Tab 4 first.")
+#         else:
+#             trainer_emails = [t["email"] for t in approved_trainers]
+            
+#             with st.form("assign_class_form"):
+#                 col1, col2 = st.columns(2)
+#                 selected_trainer = col1.selectbox("Select Trainer (Email)", trainer_emails)
+#                 event_name = col2.text_input("Event / Class Name")
+#                 coord_name = col1.text_input("Coordinator Name")
+#                 class_date = col2.text_input("Date (YYYY-MM-DD)")
+#                 class_time = col1.text_input("Time (e.g., 10:00 AM)")
+                
+#                 if st.form_submit_button("Assign Task"):
+#                     insert_data("trainer_classes", {
+#                         "trainer_email": selected_trainer,
+#                         "event_name": event_name,
+#                         "coordinator_name": coord_name,
+#                         "date": class_date,
+#                         "time": class_time,
+#                         "attendance": "Pending",
+#                         "completed": "No",
+#                         "payment_status": "Pending"
+#                     })
+#                     st.success(f"Class assigned successfully to {selected_trainer}!")
+            
+#             st.divider()
+#             st.subheader("Current Assignments")
+#             assigned_data = fetch_data("trainer_classes")
+#             if assigned_data:
+#                 st.dataframe(pd.DataFrame(assigned_data))
+
 import streamlit as st
 import pandas as pd
 from utils.db_helper import fetch_data, insert_data, update_data
@@ -136,7 +205,6 @@ from utils.db_helper import fetch_data, insert_data, update_data
 def render():
     st.title("⚙️ PRAGYAN AI - Admin Dashboard")
     
-    # Added "Assign Classes" as tab6
     tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
         "Planned Programs", "Running Programs", "Coordinators", "Trainer Approvals", "Student Approvals", "Assign Classes"
     ])
@@ -325,5 +393,29 @@ def render():
             st.divider()
             st.subheader("Current Assignments")
             assigned_data = fetch_data("trainer_classes")
+            
             if assigned_data:
-                st.dataframe(pd.DataFrame(assigned_data))
+                assigned_df = pd.DataFrame(assigned_data)
+                st.dataframe(assigned_df)
+                
+                st.write("---")
+                st.write("**Modify Assignment Status**")
+                
+                col_mod1, col_mod2, col_mod3, col_mod4 = st.columns(4)
+                with col_mod1:
+                    mod_id = st.selectbox("Select Class ID:", assigned_df['id'].tolist(), key="mod_class_id")
+                with col_mod2:
+                    mod_att = st.selectbox("Attendance", ["Pending", "Present", "Absent"], key="mod_att")
+                with col_mod3:
+                    mod_comp = st.selectbox("Completed", ["No", "Yes"], key="mod_comp")
+                with col_mod4:
+                    mod_pay = st.selectbox("Payment Status", ["Pending", "Processing", "Paid"], key="mod_pay")
+                
+                if st.button("Update Class Status"):
+                    update_data("trainer_classes", "id", mod_id, {
+                        "attendance": mod_att,
+                        "completed": mod_comp,
+                        "payment_status": mod_pay
+                    })
+                    st.success(f"Class ID {mod_id} updated successfully!")
+                    st.rerun()
