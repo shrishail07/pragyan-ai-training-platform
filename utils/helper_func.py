@@ -1,5 +1,5 @@
 def admin_filter(
-    trainers_data,
+    trainers,
     fil_by_name = None,
     fil_by_email = None,
     fil_by_skill = None
