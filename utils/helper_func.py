@@ -3,7 +3,7 @@ def admin_filter(
     fil_by_name=None,
     fil_by_email=None,
     fil_by_skill=None,
-    fil_by_skill=None
+    fil_by_status=None
 ):
     # Initialize with the original DataFrame to guarantee it always exists
     trainers_data = trainers1.copy()
