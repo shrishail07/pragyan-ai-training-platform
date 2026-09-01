@@ -106,17 +106,7 @@ def render():
                     st.error(f"Trainer ID {selected_id} Rejected.")
                     st.rerun()
 
-        st.markdown("Current Trainers Data :-> (Approved trainers only)")
-        st.dataframe(trainers[trainers["status"]=="Approved"])
 
-        st.markdown("You Can Filter The Data By (Name,Email,Skill")
-        fil_by_name  = st.text_input("Filter by Name:")
-        fil_by_email = st.text_input("Filter by Email:")
-        fil_by_skill = st.text_input("Filter by Skill:")
-
-        # 2. Run the function when the user interacts
-        result_df = admin_filter(trainers, fil_by_name, fil_by_email,fil_by_skill)
-        st.dataframe(result_df)
         
     with tab5:
         st.subheader("Student Custom Requests")
