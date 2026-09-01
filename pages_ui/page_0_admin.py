@@ -108,21 +108,23 @@ def render():
 
         trainers_data1 = fetch_data("trainer_profiles")
         trainers1 = pd.DataFrame(trainers_data1)
+        
         st.subheader("Current Expert Trainers")
-        df=trainers1[trainers1["stattus"]=="Approved"]
-        st.dataframe(df)
+        st.dataframe(trainers1[trainers1["stattus"]=="Approved"])
         
         st.subheader("You Can Filter The Data By (Name, Email, Skill)")
 
         fil_by_name = st.text_input("Filter by Name:")
         fil_by_email = st.text_input("Filter by Email:")
         fil_by_skill = st.text_input("Filter by Skill:")
+        fil_by_status = st.text_input("Filter by Status:")
 
         result_df = admin_filter(
             trainers1,
             fil_by_name,
             fil_by_email,
-            fil_by_skill
+            fil_by_skill,
+            fil_by_status
         )
 
         st.dataframe(result_df)
