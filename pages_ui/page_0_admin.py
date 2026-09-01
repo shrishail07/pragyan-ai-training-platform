@@ -5,40 +5,7 @@ import pandas as pd
 from utils.db_helper import fetch_data, insert_data, update_data
 from utils.helper_func import admin_filter
 
-# def render():
-#     st.title("⚙️ PRAGYAN AI - Admin Dashboard")
-    
-#     tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
-#         "Planned Programs", "Running Programs", "Coordinators", "Trainer Approvals", "Student Approvals", "Assign Classes"
-#     ])
-    
-#     with tab1:
-#         st.subheader("Manage Planned Programs")
-#         with st.form("add_planned"):
-#             col1, col2 = st.columns(2)
-#             name = col1.text_input("Program Name")
-#             skill = col1.selectbox("Skill Dept", ["Aptitude", "Data Science", "Machine Learning", "LLM"])
-#             duration = col1.number_input("Duration (Hours)", min_value=1)
-#             month = col2.text_input("Start Month")
-#             time = col2.selectbox("Time", ["Weekdays", "Weekends"])
-#             price = col2.number_input("Price (INR)", min_value=0)
-#             seats = col1.number_input("Seats Available", min_value=1)
-#             batch = col2.number_input("Planned Batch Size", min_value=1)
-#             co_ordinator = col1.text_input("Event Co-ordinator")
-#             expert_trainer = col2.text_input("Expert Trainer")
-            
-#             if st.form_submit_button("Commit Changes"):
-#                 insert_data("programs_planned", {
-#                     "name": name, "skill_dept": skill, "duration_hrs": duration, 
-#                     "start_month": month, "time_slot": time, "price": price, 
-#                     "seats_available": seats, "batch_size": batch, "Event_Co_ordinator" :co_ordinator,
-#                     "Expert_Trainer":expert_trainer
-#                 })
-#                 st.success("Program Added!")
-#         st.header("Current Running Programs")
-#         planned_data = fetch_data("programs_planned")
-#         if planned_data:
-#             st.dataframe(pd.DataFrame(planned_data))
+
 def render():
     st.title("⚙️ PRAGYAN AI - Admin Dashboard")
     
@@ -47,7 +14,7 @@ def render():
     ])
     
     with tab1:
-        st.subheader("ADD Planned Programs")
+        st.subheader("1.ADD Planned Programs")
         with st.form("add_planned"):
             col1, col2 = st.columns(2)
             name = col1.text_input("Program Name")
@@ -70,7 +37,7 @@ def render():
                 })
                 st.success("Program Added!")
                 
-        st.header("Current Planned Programs")
+        st.header("2.Current Planned Programs")
         planned_data = fetch_data("programs_planned")
         
         if planned_data:
@@ -78,7 +45,7 @@ def render():
             st.dataframe(planned_df)
             
             st.write("---")
-            st.write("**Modify Existing Program**")
+            st.header("3.Modify Existing Program (Current Planned Programs)")
             
             # Select ID outside the form to pre-fill the values dynamically
             selected_id = st.selectbox("Select Program ID to Modify:", planned_df['id'].tolist())
