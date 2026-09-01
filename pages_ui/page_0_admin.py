@@ -84,7 +84,7 @@ def render():
         trainers = pd.DataFrame(trainers_data)
         st.dataframe(trainers)
         st.subhedder("Current Trainers Data :-> (Approved trainers only)")
-        st.write(trainers[trainers["status"]=="Approved")
+        st.dataframe(trainers[trainers["status"]=="Approved")
         
         if not trainers.empty:
             st.divider()
