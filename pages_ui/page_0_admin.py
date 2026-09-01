@@ -35,7 +35,7 @@ def render():
                     "Expert_Trainer":expert_trainer
                 })
                 st.success("Program Added!")
-        
+        st.header("Current Running Programs")
         planned_data = fetch_data("programs_planned")
         if planned_data:
             st.dataframe(pd.DataFrame(planned_data))
