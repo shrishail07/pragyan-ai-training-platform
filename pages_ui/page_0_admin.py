@@ -106,11 +106,10 @@ def render():
                     st.error(f"Trainer ID {selected_id} Rejected.")
                     st.rerun()
 
-        st.markdown("Expert Trainer EOI & Approvals")
         trainers_data1 = fetch_data("trainer_profiles")
-        st.markdown("ALL Expert Trainer EOI & Approvals Data")
         trainers1 = pd.DataFrame(trainers_data1)
-        st.markdown("You Can Filter The Data By (Name, Email, Skill)")
+        
+        st.subheader("You Can Filter The Data By (Name, Email, Skill)")
 
         fil_by_name = st.text_input("Filter by Name:")
         fil_by_email = st.text_input("Filter by Email:")
