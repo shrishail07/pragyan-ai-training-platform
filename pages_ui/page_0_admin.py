@@ -37,7 +37,7 @@ def render():
                 })
                 st.success("Program Added!")
                 
-        st.error("2.Current Planned Programs")
+        st.info("2.Current Planned Programs")
         planned_data = fetch_data("programs_planned")
         
         if planned_data:
@@ -45,7 +45,7 @@ def render():
             st.dataframe(planned_df)
             
             st.write("---")
-            st.warning("3.Modify Existing Program (Current Planned Programs)")
+            st.info("3.Modify Existing Program (Current Planned Programs)")
             
             # Select ID outside the form to pre-fill the values dynamically
             selected_id = st.selectbox("Select Program ID to Modify:", planned_df['id'].tolist())
