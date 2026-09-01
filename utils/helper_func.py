@@ -2,6 +2,7 @@ def admin_filter(
     trainers1,
     fil_by_name=None,
     fil_by_email=None,
+    fil_by_skill=None,
     fil_by_skill=None
 ):
     # Initialize with the original DataFrame to guarantee it always exists
@@ -15,5 +16,8 @@ def admin_filter(
 
     if fil_by_skill:
         trainers_data = trainers_data[trainers_data["skill"] == fil_by_skill]
+
+    if fil_by_status:
+        trainers_data = trainers_data[trainers_data["status"] == fil_by_status]
 
     return trainers_data
