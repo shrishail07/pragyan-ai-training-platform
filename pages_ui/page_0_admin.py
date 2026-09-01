@@ -140,7 +140,7 @@ def render():
 
         if not trainers.empty:
             st.divider()
-            st.warning("Manage Trainer Approval Status")
+            st.error("Manage Trainer Approval Status")
             col1, col2, col3 = st.columns([2, 1, 1])
             with col1:
                 selected_id = st.selectbox("Select Trainer ID:", trainers['id'].tolist(), key="trainer_select")
