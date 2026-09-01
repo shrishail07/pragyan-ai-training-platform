@@ -47,7 +47,7 @@ def render():
     ])
     
     with tab1:
-        st.subheader("Manage Planned Programs")
+        st.subheader("ADD Planned Programs")
         with st.form("add_planned"):
             col1, col2 = st.columns(2)
             name = col1.text_input("Program Name")
