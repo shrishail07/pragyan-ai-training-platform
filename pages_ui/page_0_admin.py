@@ -78,9 +78,9 @@ def render():
             st.dataframe(pd.DataFrame(coord_data))
         
     with tab4:
-        st.subheader("Expert Trainer EOI & Approvals")
+        st.markdown("Expert Trainer EOI & Approvals")
         trainers_data = fetch_data("trainer_profiles")
-        st.subhedder("ALL Expert Trainer EOI & Approvals Data")
+        st.markdown("ALL Expert Trainer EOI & Approvals Data")
         trainers = pd.DataFrame(trainers_data)
         st.dataframe(trainers)
         
