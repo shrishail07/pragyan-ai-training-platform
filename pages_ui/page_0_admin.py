@@ -134,7 +134,11 @@ def render():
         for prog in all_planned_data:
             try:
                 date_str = prog.get('start_date')
-                prog_date = datetime.date.fromisoformat(date_str) if date_str else today
+                # Check if date_str is valid and not a pandas NaN
+                if date_str and pd.notna(date_str):
+                    prog_date = datetime.date.fromisoformat(str(date_str))
+                else:
+                    prog_date = today
             except Exception:
                 prog_date = today
                 
@@ -186,11 +190,20 @@ def render():
             curr_skill_idx = skill_opts.index(current_prog['skill_dept']) if current_prog['skill_dept'] in skill_opts else 0
             curr_time_idx = time_opts.index(current_prog['time_slot']) if current_prog['time_slot'] in time_opts else 0
             
-            try:
-                curr_start_date = datetime.date.fromisoformat(current_prog.get('start_date', today.isoformat()))
-            except:
-                curr_start_date = today
-            curr_start_year = int(current_prog.get('start_year', 2026))
+            # Safe extraction for dates and integers
+            curr_start_date = today
+            if 'start_date' in current_prog and pd.notna(current_prog['start_date']):
+                try:
+                    curr_start_date = datetime.date.fromisoformat(str(current_prog['start_date']))
+                except Exception:
+                    pass
+                    
+            curr_start_year = 2026
+            if 'start_year' in current_prog and pd.notna(current_prog['start_year']):
+                try:
+                    curr_start_year = int(current_prog['start_year'])
+                except Exception:
+                    pass
             
             with st.form("update_planned_form"):
                 col_mod1, col_mod2 = st.columns(2)
@@ -222,7 +235,6 @@ def render():
     with tab2:
         st.subheader("Manage Running Programs")
         
-        # Display Auto-Transitioned Programs from Tab 1
         st.info("Programs Running Automatically (Start Date Reached)")
         if past_running:
             past_df = pd.DataFrame(past_running)
@@ -238,11 +250,20 @@ def render():
             p_skill_idx = skill_opts.index(past_prog['skill_dept']) if past_prog['skill_dept'] in skill_opts else 0
             p_time_idx = time_opts.index(past_prog['time_slot']) if past_prog['time_slot'] in time_opts else 0
             
-            try:
-                p_start_date = datetime.date.fromisoformat(past_prog.get('start_date', today.isoformat()))
-            except:
-                p_start_date = today
-            p_start_year = int(past_prog.get('start_year', 2026))
+            # Safe extraction for dates and integers
+            p_start_date = today
+            if 'start_date' in past_prog and pd.notna(past_prog['start_date']):
+                try:
+                    p_start_date = datetime.date.fromisoformat(str(past_prog['start_date']))
+                except Exception:
+                    pass
+                    
+            p_start_year = 2026
+            if 'start_year' in past_prog and pd.notna(past_prog['start_year']):
+                try:
+                    p_start_year = int(past_prog['start_year'])
+                except Exception:
+                    pass
             
             with st.form("update_auto_running_form"):
                 col_p1, col_p2 = st.columns(2)
@@ -271,11 +292,10 @@ def render():
                     st.success(f"Program ID {sel_past_id} updated successfully!")
                     st.rerun()
         else:
-            st.write("No planned programs have crossed their start date yet.")
+            st.info("No planned programs have crossed their start date yet.")
             
         st.divider()
 
-        # Original Manual Running Programs Section
         st.info("Manually Added Running Programs")
         with st.form("add_running"):
             col1, col2 = st.columns(2)
