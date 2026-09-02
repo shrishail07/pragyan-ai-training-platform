@@ -1,3 +1,5 @@
+import pandas as pd
+
 def admin_filter(
     trainers1,
     fil_by_name=None,
