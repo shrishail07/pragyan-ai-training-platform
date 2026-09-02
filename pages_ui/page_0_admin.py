@@ -96,7 +96,7 @@ def render():
 
 
     with tab2:
-        st.subheader("Manage Running Programs")
+        st.info("Please Update(ADD) The Running Program")
         with st.form("add_running"):
             col1, col2 = st.columns(2)
             name       = col1.text_input("Course Name")
