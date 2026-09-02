@@ -181,122 +181,195 @@ def render():
                         st.rerun()
     
     # with tab3:
-    #     st.subheader("Program Coordinators")
-    #     with st.form("add_coordinator"):
-    #         col1, col2 = st.columns(2)
-    #         prog_name = col1.text_input("Program Name")
-    #         name = col2.text_input("Coordinator Name")
-    #         email = col1.text_input("Email Id")
-    #         phone = col2.text_input("Phone Number")
-    #         exp = col1.text_input("Experience")
-    #         cv = col2.text_input("CV Link")
-    #         linkedin = col1.text_input("LinkedIn Profile")
-    #         github = col2.text_input("GitHub Link")
-    #         emp_id = col1.text_input("Employee ID")
-    #         if st.form_submit_button("Commit Changes"):
-    #             insert_data("coordinators", {
-    #                 "program_name": prog_name, "name": name, "email": email, "phone": phone, 
-    #                 "experience": exp, "cv_link": cv, "linkedin": linkedin, "github": github, "emp_id": emp_id
-    #             })
-    #             st.success("Coordinator Added!")
+    #         st.info("1. Add Program Coordinator")
+    #         with st.form("add_coordinator"):
+    #             col1, col2 = st.columns(2)
+    #             prog_name = col1.text_input("Program Name")
+    #             name = col2.text_input("Coordinator Name")
+    #             email = col1.text_input("Email Id")
+    #             phone = col2.text_input("Phone Number")
+    #             exp = col1.text_input("Experience")
+    #             cv = col2.text_input("CV Link")
+    #             linkedin = col1.text_input("LinkedIn Profile")
+    #             github = col2.text_input("GitHub Link")
+    #             emp_id = col1.text_input("Employee ID")
+    #             if st.form_submit_button("Commit Changes"):
+    #                 insert_data("coordinators", {
+    #                     "program_name": prog_name, "name": name, "email": email, "phone": phone, 
+    #                     "experience": exp, "cv_link": cv, "linkedin": linkedin, "github": github, "emp_id": emp_id
+    #                 })
+    #                 st.cache_data.clear()
+    #                 st.success("Coordinator Added!")
+    #                 st.rerun()
                 
-    #     coord_data = fetch_data("coordinators")
-    #     if coord_data:
-    #         st.dataframe(pd.DataFrame(coord_data))
-
-    with tab3:
-            st.info("1. Add Program Coordinator")
-            with st.form("add_coordinator"):
-                col1, col2 = st.columns(2)
-                prog_name = col1.text_input("Program Name")
-                name = col2.text_input("Coordinator Name")
-                email = col1.text_input("Email Id")
-                phone = col2.text_input("Phone Number")
-                exp = col1.text_input("Experience")
-                cv = col2.text_input("CV Link")
-                linkedin = col1.text_input("LinkedIn Profile")
-                github = col2.text_input("GitHub Link")
-                emp_id = col1.text_input("Employee ID")
-                if st.form_submit_button("Commit Changes"):
-                    insert_data("coordinators", {
-                        "program_name": prog_name, "name": name, "email": email, "phone": phone, 
-                        "experience": exp, "cv_link": cv, "linkedin": linkedin, "github": github, "emp_id": emp_id
-                    })
-                    st.cache_data.clear()
-                    st.success("Coordinator Added!")
-                    st.rerun()
-                
-            st.info("2. Filter & View Coordinator Data")
-            coord_data = fetch_data("coordinators")
-            planned_data = fetch_data("programs_planned")
-            running_data = fetch_data("programs_running")
+    #         st.info("2. Filter & View Coordinator Data")
+    #         coord_data = fetch_data("coordinators")
+    #         planned_data = fetch_data("programs_planned")
+    #         running_data = fetch_data("programs_running")
         
-            if coord_data:
-                coord_df = pd.DataFrame(coord_data)
+    #         if coord_data:
+    #             coord_df = pd.DataFrame(coord_data)
             
-                # Filter mechanism
-                unique_coords = ["All"] + coord_df['name'].dropna().unique().tolist()
-                selected_coord_filter = st.selectbox("Filter Data by Coordinator Name:", unique_coords)
+    #             # Filter mechanism
+    #             unique_coords = ["All"] + coord_df['name'].dropna().unique().tolist()
+    #             selected_coord_filter = st.selectbox("Filter Data by Coordinator Name:", unique_coords)
             
-                if selected_coord_filter != "All":
-                    filtered_coord_df = coord_df[coord_df['name'] == selected_coord_filter]
-                else:
-                    filtered_coord_df = coord_df
+    #             if selected_coord_filter != "All":
+    #                 filtered_coord_df = coord_df[coord_df['name'] == selected_coord_filter]
+    #             else:
+    #                 filtered_coord_df = coord_df
                 
-                st.write("**Coordinator Profiles:**")
-                st.dataframe(filtered_coord_df)
+    #             st.write("**Coordinator Profiles:**")
+    #             st.dataframe(filtered_coord_df)
             
-                st.write("---")
-                st.info("3. Coordinator-Wise Assigned Programs")
+    #             st.write("---")
+    #             st.info("3. Coordinator-Wise Assigned Programs")
             
-                if selected_coord_filter != "All":
-                    st.write(f"**Programs assigned to: {selected_coord_filter}**")
+    #             if selected_coord_filter != "All":
+    #                 st.write(f"**Programs assigned to: {selected_coord_filter}**")
                 
-                    # Planned Programs Filter
-                    if planned_data:
-                        planned_df = pd.DataFrame(planned_data)
-                        if 'Event_Co_ordinator' in planned_df.columns:
-                            coord_planned = planned_df[planned_df['Event_Co_ordinator'] == selected_coord_filter]
-                            st.write("Planned Programs:")
-                            st.dataframe(coord_planned if not coord_planned.empty else pd.DataFrame(columns=planned_df.columns))
+    #                 # Planned Programs Filter
+    #                 if planned_data:
+    #                     planned_df = pd.DataFrame(planned_data)
+    #                     if 'Event_Co_ordinator' in planned_df.columns:
+    #                         coord_planned = planned_df[planned_df['Event_Co_ordinator'] == selected_coord_filter]
+    #                         st.write("Planned Programs:")
+    #                         st.dataframe(coord_planned if not coord_planned.empty else pd.DataFrame(columns=planned_df.columns))
                 
-                    # Running Programs Filter
-                    if running_data:
-                        running_df = pd.DataFrame(running_data)
-                        if 'Event_Co_ordinator' in running_df.columns:
-                            coord_running = running_df[running_df['Event_Co_ordinator'] == selected_coord_filter]
-                            st.write("Running Programs:")
-                            st.dataframe(coord_running if not coord_running.empty else pd.DataFrame(columns=running_df.columns))
-                else:
-                    st.warning("Please select a specific coordinator from the filter above to view their assigned programs.")
+    #                 # Running Programs Filter
+    #                 if running_data:
+    #                     running_df = pd.DataFrame(running_data)
+    #                     if 'Event_Co_ordinator' in running_df.columns:
+    #                         coord_running = running_df[running_df['Event_Co_ordinator'] == selected_coord_filter]
+    #                         st.write("Running Programs:")
+    #                         st.dataframe(coord_running if not coord_running.empty else pd.DataFrame(columns=running_df.columns))
+    #             else:
+    #                 st.warning("Please select a specific coordinator from the filter above to view their assigned programs.")
             
-                st.write("---")
-                st.info("4. Modify Existing Coordinator")
+    #             st.write("---")
+    #             st.info("4. Modify Existing Coordinator")
             
-                if not filtered_coord_df.empty:
-                    sel_coord_id = st.selectbox("Select Coordinator ID to Modify:", filtered_coord_df['id'].tolist(), key="mod_coord_id")
-                    coord_to_mod = filtered_coord_df[filtered_coord_df['id'] == sel_coord_id].iloc[0]
+    #             if not filtered_coord_df.empty:
+    #                 sel_coord_id = st.selectbox("Select Coordinator ID to Modify:", filtered_coord_df['id'].tolist(), key="mod_coord_id")
+    #                 coord_to_mod = filtered_coord_df[filtered_coord_df['id'] == sel_coord_id].iloc[0]
                 
-                    with st.form("update_coordinator_form"):
-                        col_c1, col_c2 = st.columns(2)
-                        mod_prog = col_c1.text_input("Program Name", value=str(coord_to_mod.get('program_name', '')))
-                        mod_name = col_c2.text_input("Coordinator Name", value=str(coord_to_mod.get('name', '')))
-                        mod_email = col_c1.text_input("Email Id", value=str(coord_to_mod.get('email', '')))
-                        mod_phone = col_c2.text_input("Phone Number", value=str(coord_to_mod.get('phone', '')))
-                        mod_exp = col_c1.text_input("Experience", value=str(coord_to_mod.get('experience', '')))
-                        mod_cv = col_c2.text_input("CV Link", value=str(coord_to_mod.get('cv_link', '')))
-                        mod_linked = col_c1.text_input("LinkedIn Profile", value=str(coord_to_mod.get('linkedin', '')))
-                        mod_git = col_c2.text_input("GitHub Link", value=str(coord_to_mod.get('github', '')))
-                        mod_empid = col_c1.text_input("Employee ID", value=str(coord_to_mod.get('emp_id', '')))
+    #                 with st.form("update_coordinator_form"):
+    #                     col_c1, col_c2 = st.columns(2)
+    #                     mod_prog = col_c1.text_input("Program Name", value=str(coord_to_mod.get('program_name', '')))
+    #                     mod_name = col_c2.text_input("Coordinator Name", value=str(coord_to_mod.get('name', '')))
+    #                     mod_email = col_c1.text_input("Email Id", value=str(coord_to_mod.get('email', '')))
+    #                     mod_phone = col_c2.text_input("Phone Number", value=str(coord_to_mod.get('phone', '')))
+    #                     mod_exp = col_c1.text_input("Experience", value=str(coord_to_mod.get('experience', '')))
+    #                     mod_cv = col_c2.text_input("CV Link", value=str(coord_to_mod.get('cv_link', '')))
+    #                     mod_linked = col_c1.text_input("LinkedIn Profile", value=str(coord_to_mod.get('linkedin', '')))
+    #                     mod_git = col_c2.text_input("GitHub Link", value=str(coord_to_mod.get('github', '')))
+    #                     mod_empid = col_c1.text_input("Employee ID", value=str(coord_to_mod.get('emp_id', '')))
                     
-                        if st.form_submit_button("Update Coordinator"):
-                            update_data("coordinators", "id", sel_coord_id, {
-                                "program_name": mod_prog, "name": mod_name, "email": mod_email, "phone": mod_phone, 
-                                "experience": mod_exp, "cv_link": mod_cv, "linkedin": mod_linked, "github": mod_git, "emp_id": mod_empid
-                            })
-                            st.cache_data.clear()
-                            st.success(f"Coordinator ID {sel_coord_id} updated successfully!")
-                            st.rerun()        
+    #                     if st.form_submit_button("Update Coordinator"):
+    #                         update_data("coordinators", "id", sel_coord_id, {
+    #                             "program_name": mod_prog, "name": mod_name, "email": mod_email, "phone": mod_phone, 
+    #                             "experience": mod_exp, "cv_link": mod_cv, "linkedin": mod_linked, "github": mod_git, "emp_id": mod_empid
+    #                         })
+    #                         st.cache_data.clear()
+    #                         st.success(f"Coordinator ID {sel_coord_id} updated successfully!")
+    #                         st.rerun()        
+    
+    with tab3:
+        st.info("1. Manage Coordinator Approvals")
+        coord_data = fetch_data("coordinators")
+        
+        if coord_data:
+            coord_df = pd.DataFrame(coord_data)
+            
+            # Approvals Sub-section
+            pending_coords = coord_df[coord_df.get('status', 'Approved') == 'Pending']
+            if not pending_coords.empty:
+                st.warning("Pending Profiles:")
+                st.dataframe(pending_coords)
+                
+                col_c1, col_c2, col_c3 = st.columns([2, 1, 1])
+                with col_c1:
+                    sel_c_id = st.selectbox("Select Coordinator ID to Approve:", pending_coords['id'].tolist(), key="coord_app_id")
+                with col_c2:
+                    st.write(""); st.write("")
+                    if st.button("✅ Approve"):
+                        update_data("coordinators", "id", sel_c_id, {"status": "Approved"})
+                        st.cache_data.clear(); st.rerun()
+                with col_c3:
+                    st.write(""); st.write("")
+                    if st.button("❌ Reject"):
+                        update_data("coordinators", "id", sel_c_id, {"status": "Rejected"})
+                        st.cache_data.clear(); st.rerun()
+            else:
+                st.success("No pending coordinator approvals.")
+                
+            st.divider()
+            st.info("2. Filter & View Coordinator Data")
+            
+            unique_coords = ["All"] + coord_df['name'].dropna().unique().tolist()
+            selected_coord_filter = st.selectbox("Filter Data by Coordinator Name:", unique_coords)
+            
+            if selected_coord_filter != "All":
+                filtered_coord_df = coord_df[coord_df['name'] == selected_coord_filter]
+            else:
+                filtered_coord_df = coord_df
+                
+            st.write("**Coordinator Profiles:**")
+            st.dataframe(filtered_coord_df)
+            
+            st.write("---")
+            st.info("3. Coordinator-Wise Assigned Programs")
+            
+            if selected_coord_filter != "All":
+                st.write(f"**Programs assigned to: {selected_coord_filter}**")
+                
+                planned_data = fetch_data("programs_planned")
+                if planned_data:
+                    planned_df = pd.DataFrame(planned_data)
+                    if 'Event_Co_ordinator' in planned_df.columns:
+                        coord_planned = planned_df[planned_df['Event_Co_ordinator'] == selected_coord_filter]
+                        st.write("Planned Programs:")
+                        st.dataframe(coord_planned if not coord_planned.empty else pd.DataFrame(columns=planned_df.columns))
+                
+                running_data = fetch_data("programs_running")
+                if running_data:
+                    running_df = pd.DataFrame(running_data)
+                    if 'Event_Co_ordinator' in running_df.columns:
+                        coord_running = running_df[running_df['Event_Co_ordinator'] == selected_coord_filter]
+                        st.write("Running Programs:")
+                        st.dataframe(coord_running if not coord_running.empty else pd.DataFrame(columns=running_df.columns))
+            else:
+                st.warning("Please select a specific coordinator from the filter above to view their assigned programs.")
+            
+            st.write("---")
+            st.info("4. Modify Existing Coordinator")
+            
+            if not filtered_coord_df.empty:
+                sel_coord_id = st.selectbox("Select Coordinator ID to Modify:", filtered_coord_df['id'].tolist(), key="mod_coord_id")
+                coord_to_mod = filtered_coord_df[filtered_coord_df['id'] == sel_coord_id].iloc[0]
+                
+                with st.form("update_coordinator_form"):
+                    col_cf1, col_cf2 = st.columns(2)
+                    mod_prog = col_cf1.text_input("Program Name", value=str(coord_to_mod.get('program_name', '')))
+                    mod_name = col_cf2.text_input("Coordinator Name", value=str(coord_to_mod.get('name', '')))
+                    mod_email = col_cf1.text_input("Email Id", value=str(coord_to_mod.get('email', '')))
+                    mod_phone = col_cf2.text_input("Phone Number", value=str(coord_to_mod.get('phone', '')))
+                    mod_exp = col_cf1.text_input("Experience", value=str(coord_to_mod.get('experience', '')))
+                    mod_cv = col_cf2.text_input("CV Link", value=str(coord_to_mod.get('cv_link', '')))
+                    mod_linked = col_cf1.text_input("LinkedIn Profile", value=str(coord_to_mod.get('linkedin', '')))
+                    mod_git = col_cf2.text_input("GitHub Link", value=str(coord_to_mod.get('github', '')))
+                    mod_empid = col_cf1.text_input("Employee ID", value=str(coord_to_mod.get('emp_id', '')))
+                    
+                    if st.form_submit_button("Update Coordinator"):
+                        update_data("coordinators", "id", sel_coord_id, {
+                            "program_name": mod_prog, "name": mod_name, "email": mod_email, "phone": mod_phone, 
+                            "experience": mod_exp, "cv_link": mod_cv, "linkedin": mod_linked, "github": mod_git, "emp_id": mod_empid
+                        })
+                        st.cache_data.clear()
+                        st.success(f"Coordinator ID {sel_coord_id} updated successfully!")
+                        st.rerun()
+        else:
+            st.warning("No coordinators found in the database. Wait for a coordinator to register via their portal.")
     with tab4:
         st.info("1.Expert Trainer EOI & Approvals")
         trainers_data = fetch_data("trainer_profiles")
