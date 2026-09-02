@@ -1,10 +1,121 @@
 
 
+# import streamlit as st
+# import pandas as pd
+# from utils.db_helper import fetch_data, insert_data, update_data
+# from utils.helper_func import admin_filter
+
+
+# def render():
+#     st.title("⚙️ PRAGYAN AI - Admin Dashboard")
+    
+#     tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+#         "Planned Programs", "Running Programs", "Coordinators", "Trainer Approvals", "Student Approvals", "Assign Classes"
+#     ])
+    
+#     with tab1:
+#         st.info("1.ADD Planned Programs")
+#         with st.form("add_planned"):
+#             col1, col2 = st.columns(2)
+#             name = col1.text_input("Program Name")
+#             skill = col1.selectbox("Skill Dept", ["Aptitude", "Data Science", "Machine Learning", "LLM"])
+#             duration = col1.number_input("Duration (Hours)", min_value=1)
+#             month = col2.text_input("Start Month")
+#             time = col2.selectbox("Time", ["Weekdays", "Weekends"])
+#             price = col2.number_input("Price (INR)", min_value=0)
+#             seats = col1.number_input("Seats Available", min_value=1)
+#             batch = col2.number_input("Planned Batch Size", min_value=1)
+#             co_ordinator = col1.text_input("Event Co-ordinator")
+#             expert_trainer = col2.text_input("Expert Trainer")
+#             start_date = col1.date_input("Event start date")
+#             start_year = col2.number_input("Event start year",
+#                                           min_value=2026,
+#                                           max_value=2100,
+#                                            value=2026,
+#                                           step=1)
+            
+#             if st.form_submit_button("Commit Changes"):
+#                 insert_data("programs_planned", {
+#                     "name": name, "skill_dept": skill, "duration_hrs": duration, 
+#                     "start_month": month, "time_slot": time, "price": price, 
+#                     "seats_available": seats, "batch_size": batch, "Event_Co_ordinator" :co_ordinator,
+#                     "Expert_Trainer":expert_trainer, "start_date":start_date.isoformat(), "start_year":int(start_year)
+#                 })
+#                 st.success("Program Added!")
+                
+#         st.info("2.Current Planned Programs")
+#         planned_data = fetch_data("programs_planned")
+        
+#         if planned_data:
+#             planned_df = pd.DataFrame(planned_data)
+#             st.dataframe(planned_df)
+            
+#             st.write("---")
+#             st.info("3.Modify Existing Program (Current Planned Programs)")
+            
+#             # Select ID outside the form to pre-fill the values dynamically
+#             selected_id = st.selectbox("Select Program ID to Modify:", planned_df['id'].tolist())
+            
+#             # Extract current data for the selected ID
+#             current_prog = planned_df[planned_df['id'] == selected_id].iloc[0]
+            
+#             # Safe index lookups for selectboxes
+#             skill_opts = ["Aptitude", "Data Science", "Machine Learning", "LLM"]
+#             time_opts = ["Weekdays", "Weekends"]
+#             curr_skill_idx = skill_opts.index(current_prog['skill_dept']) if current_prog['skill_dept'] in skill_opts else 0
+#             curr_time_idx = time_opts.index(current_prog['time_slot']) if current_prog['time_slot'] in time_opts else 0
+            
+#             with st.form("update_planned_form"):
+#                 col_mod1, col_mod2 = st.columns(2)
+#                 mod_name = col_mod1.text_input("Program Name", value=current_prog['name'])
+#                 mod_skill = col_mod1.selectbox("Skill Dept", skill_opts, index=curr_skill_idx)
+#                 mod_duration = col_mod1.number_input("Duration (Hours)", min_value=1, value=int(current_prog['duration_hrs']))
+#                 mod_month = col_mod2.text_input("Start Month", value=current_prog['start_month'])
+#                 mod_time = col_mod2.selectbox("Time", time_opts, index=curr_time_idx)
+#                 mod_price = col_mod2.number_input("Price (INR)", min_value=0, value=int(current_prog['price']))
+#                 mod_seats = col_mod1.number_input("Seats Available", min_value=1, value=int(current_prog['seats_available']))
+#                 mod_batch = col_mod2.number_input("Planned Batch Size", min_value=1, value=int(current_prog['batch_size']))
+#                 mod_coord = col_mod1.text_input("Event Co-ordinator", value=current_prog.get('Event_Co_ordinator', ''))
+#                 mod_trainer = col_mod2.text_input("Expert Trainer", value=current_prog.get('Expert_Trainer', ''))
+                
+#                 if st.form_submit_button("Update Program"):
+#                     update_data("programs_planned", "id", selected_id, {
+#                         "name": mod_name,
+#                         "skill_dept": mod_skill,
+#                         "duration_hrs": mod_duration,
+#                         "start_month": mod_month,
+#                         "time_slot": mod_time,
+#                         "price": mod_price,
+#                         "seats_available": mod_seats,
+#                         "batch_size": mod_batch,
+#                         "Event_Co_ordinator": mod_coord,
+#                         "Expert_Trainer": mod_trainer
+#                     })
+#                     st.success(f"Program ID {selected_id} updated successfully!")
+#                     st.rerun()
+
+
+#     with tab2:
+#         st.subheader("Manage Running Programs")
+#         with st.form("add_running"):
+#             col1, col2 = st.columns(2)
+#             name = col1.text_input("Course Name")
+#             duration = col1.text_input("Duration")
+#             skills = col2.text_input("Skills")
+#             link = col2.text_input("Class Link")
+#             if st.form_submit_button("Commit Changes"):
+#                 insert_data("programs_running", {
+#                     "name": name, "duration": duration, "skills": skills, "class_link": link
+#                 })
+#                 st.success("Running Program Added!")
+                
+#         running_data = fetch_data("programs_running")
+#         if running_data:
+#             st.dataframe(pd.DataFrame(running_data))
 import streamlit as st
 import pandas as pd
+import datetime
 from utils.db_helper import fetch_data, insert_data, update_data
-from utils.helper_func import admin_filter
-
 
 def render():
     st.title("⚙️ PRAGYAN AI - Admin Dashboard")
@@ -13,8 +124,27 @@ def render():
         "Planned Programs", "Running Programs", "Coordinators", "Trainer Approvals", "Student Approvals", "Assign Classes"
     ])
     
+    # Pre-fetch and categorize planned programs based on date
+    today = datetime.date.today()
+    all_planned_data = fetch_data("programs_planned")
+    future_planned = []
+    past_running = []
+    
+    if all_planned_data:
+        for prog in all_planned_data:
+            try:
+                date_str = prog.get('start_date')
+                prog_date = datetime.date.fromisoformat(date_str) if date_str else today
+            except Exception:
+                prog_date = today
+                
+            if prog_date < today:
+                past_running.append(prog)
+            else:
+                future_planned.append(prog)
+    
     with tab1:
-        st.info("1.ADD Planned Programs")
+        st.info("1. ADD Planned Programs")
         with st.form("add_planned"):
             col1, col2 = st.columns(2)
             name = col1.text_input("Program Name")
@@ -28,11 +158,7 @@ def render():
             co_ordinator = col1.text_input("Event Co-ordinator")
             expert_trainer = col2.text_input("Expert Trainer")
             start_date = col1.date_input("Event start date")
-            start_year = col2.number_input("Event start year",
-                                          min_value=2026,
-                                          max_value=2100,
-                                           value=2026,
-                                          step=1)
+            start_year = col2.number_input("Event start year", min_value=2026, max_value=2100, value=2026, step=1)
             
             if st.form_submit_button("Commit Changes"):
                 insert_data("programs_planned", {
@@ -41,29 +167,30 @@ def render():
                     "seats_available": seats, "batch_size": batch, "Event_Co_ordinator" :co_ordinator,
                     "Expert_Trainer":expert_trainer, "start_date":start_date.isoformat(), "start_year":int(start_year)
                 })
+                st.cache_data.clear()
                 st.success("Program Added!")
+                st.rerun()
                 
-        st.info("2.Current Planned Programs")
-        planned_data = fetch_data("programs_planned")
-        
-        if planned_data:
-            planned_df = pd.DataFrame(planned_data)
+        st.info("2. Current Planned Programs (Upcoming)")
+        if future_planned:
+            planned_df = pd.DataFrame(future_planned)
             st.dataframe(planned_df)
             
             st.write("---")
-            st.info("3.Modify Existing Program (Current Planned Programs)")
-            
-            # Select ID outside the form to pre-fill the values dynamically
-            selected_id = st.selectbox("Select Program ID to Modify:", planned_df['id'].tolist())
-            
-            # Extract current data for the selected ID
+            st.info("3. Modify Upcoming Program")
+            selected_id = st.selectbox("Select Program ID to Modify:", planned_df['id'].tolist(), key="mod_upcoming_id")
             current_prog = planned_df[planned_df['id'] == selected_id].iloc[0]
             
-            # Safe index lookups for selectboxes
             skill_opts = ["Aptitude", "Data Science", "Machine Learning", "LLM"]
             time_opts = ["Weekdays", "Weekends"]
             curr_skill_idx = skill_opts.index(current_prog['skill_dept']) if current_prog['skill_dept'] in skill_opts else 0
             curr_time_idx = time_opts.index(current_prog['time_slot']) if current_prog['time_slot'] in time_opts else 0
+            
+            try:
+                curr_start_date = datetime.date.fromisoformat(current_prog.get('start_date', today.isoformat()))
+            except:
+                curr_start_date = today
+            curr_start_year = int(current_prog.get('start_year', 2026))
             
             with st.form("update_planned_form"):
                 col_mod1, col_mod2 = st.columns(2)
@@ -77,26 +204,79 @@ def render():
                 mod_batch = col_mod2.number_input("Planned Batch Size", min_value=1, value=int(current_prog['batch_size']))
                 mod_coord = col_mod1.text_input("Event Co-ordinator", value=current_prog.get('Event_Co_ordinator', ''))
                 mod_trainer = col_mod2.text_input("Expert Trainer", value=current_prog.get('Expert_Trainer', ''))
+                mod_start_date = col_mod1.date_input("Event start date", value=curr_start_date)
+                mod_start_year = col_mod2.number_input("Event start year", min_value=2026, max_value=2100, value=curr_start_year, step=1)
                 
                 if st.form_submit_button("Update Program"):
                     update_data("programs_planned", "id", selected_id, {
-                        "name": mod_name,
-                        "skill_dept": mod_skill,
-                        "duration_hrs": mod_duration,
-                        "start_month": mod_month,
-                        "time_slot": mod_time,
-                        "price": mod_price,
-                        "seats_available": mod_seats,
-                        "batch_size": mod_batch,
-                        "Event_Co_ordinator": mod_coord,
-                        "Expert_Trainer": mod_trainer
+                        "name": mod_name, "skill_dept": mod_skill, "duration_hrs": mod_duration,
+                        "start_month": mod_month, "time_slot": mod_time, "price": mod_price,
+                        "seats_available": mod_seats, "batch_size": mod_batch,
+                        "Event_Co_ordinator": mod_coord, "Expert_Trainer": mod_trainer,
+                        "start_date": mod_start_date.isoformat(), "start_year": int(mod_start_year)
                     })
+                    st.cache_data.clear()
                     st.success(f"Program ID {selected_id} updated successfully!")
                     st.rerun()
 
-
     with tab2:
         st.subheader("Manage Running Programs")
+        
+        # Display Auto-Transitioned Programs from Tab 1
+        st.info("Programs Running Automatically (Start Date Reached)")
+        if past_running:
+            past_df = pd.DataFrame(past_running)
+            st.dataframe(past_df)
+            
+            st.write("---")
+            st.write("**Modify Auto-Running Program**")
+            sel_past_id = st.selectbox("Select Program ID to Modify:", past_df['id'].tolist(), key="mod_past_id")
+            past_prog = past_df[past_df['id'] == sel_past_id].iloc[0]
+            
+            skill_opts = ["Aptitude", "Data Science", "Machine Learning", "LLM"]
+            time_opts = ["Weekdays", "Weekends"]
+            p_skill_idx = skill_opts.index(past_prog['skill_dept']) if past_prog['skill_dept'] in skill_opts else 0
+            p_time_idx = time_opts.index(past_prog['time_slot']) if past_prog['time_slot'] in time_opts else 0
+            
+            try:
+                p_start_date = datetime.date.fromisoformat(past_prog.get('start_date', today.isoformat()))
+            except:
+                p_start_date = today
+            p_start_year = int(past_prog.get('start_year', 2026))
+            
+            with st.form("update_auto_running_form"):
+                col_p1, col_p2 = st.columns(2)
+                p_name = col_p1.text_input("Program Name", value=past_prog['name'])
+                p_skill = col_p1.selectbox("Skill Dept", skill_opts, index=p_skill_idx)
+                p_duration = col_p1.number_input("Duration (Hours)", min_value=1, value=int(past_prog['duration_hrs']))
+                p_month = col_p2.text_input("Start Month", value=past_prog['start_month'])
+                p_time = col_p2.selectbox("Time", time_opts, index=p_time_idx)
+                p_price = col_p2.number_input("Price (INR)", min_value=0, value=int(past_prog['price']))
+                p_seats = col_p1.number_input("Seats Available", min_value=1, value=int(past_prog['seats_available']))
+                p_batch = col_p2.number_input("Planned Batch Size", min_value=1, value=int(past_prog['batch_size']))
+                p_coord = col_p1.text_input("Event Co-ordinator", value=past_prog.get('Event_Co_ordinator', ''))
+                p_trainer = col_p2.text_input("Expert Trainer", value=past_prog.get('Expert_Trainer', ''))
+                p_date_mod = col_p1.date_input("Event start date", value=p_start_date)
+                p_year_mod = col_p2.number_input("Event start year", min_value=2026, max_value=2100, value=p_start_year, step=1)
+                
+                if st.form_submit_button("Update Program"):
+                    update_data("programs_planned", "id", sel_past_id, {
+                        "name": p_name, "skill_dept": p_skill, "duration_hrs": p_duration,
+                        "start_month": p_month, "time_slot": p_time, "price": p_price,
+                        "seats_available": p_seats, "batch_size": p_batch,
+                        "Event_Co_ordinator": p_coord, "Expert_Trainer": p_trainer,
+                        "start_date": p_date_mod.isoformat(), "start_year": int(p_year_mod)
+                    })
+                    st.cache_data.clear()
+                    st.success(f"Program ID {sel_past_id} updated successfully!")
+                    st.rerun()
+        else:
+            st.write("No planned programs have crossed their start date yet.")
+            
+        st.divider()
+
+        # Original Manual Running Programs Section
+        st.info("Manually Added Running Programs")
         with st.form("add_running"):
             col1, col2 = st.columns(2)
             name = col1.text_input("Course Name")
@@ -107,12 +287,14 @@ def render():
                 insert_data("programs_running", {
                     "name": name, "duration": duration, "skills": skills, "class_link": link
                 })
+                st.cache_data.clear()
                 st.success("Running Program Added!")
+                st.rerun()
                 
         running_data = fetch_data("programs_running")
         if running_data:
             st.dataframe(pd.DataFrame(running_data))
-        
+
     with tab3:
         st.subheader("Program Coordinators")
         with st.form("add_coordinator"):
