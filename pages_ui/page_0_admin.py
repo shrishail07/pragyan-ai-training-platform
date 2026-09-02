@@ -281,8 +281,12 @@ def render():
         if coord_data:
             coord_df = pd.DataFrame(coord_data)
             
+            # Safely handle missing status column for older database entries
+            if 'status' not in coord_df.columns:
+                coord_df['status'] = 'Approved'
+            
             # Approvals Sub-section
-            pending_coords = coord_df[coord_df.get('status', 'Approved') == 'Pending']
+            pending_coords = coord_df[coord_df['status'] == 'Pending']
             if not pending_coords.empty:
                 st.warning("Pending Profiles:")
                 st.dataframe(pending_coords)
