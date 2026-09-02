@@ -28,7 +28,11 @@ def render():
             co_ordinator = col1.text_input("Event Co-ordinator")
             expert_trainer = col2.text_input("Expert Trainer")
             start_date = col1.date_input("Event start date")
-            start_year = col2.number_input("Event start year")
+            start_year = col2.number_input("Event start year",
+                                          min_value=2026,
+                                          max_value=2100,
+                                           value=2026,
+                                          step=1)
             
             if st.form_submit_button("Commit Changes"):
                 insert_data("programs_planned", {
