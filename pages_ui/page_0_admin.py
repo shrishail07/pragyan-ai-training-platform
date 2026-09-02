@@ -184,6 +184,7 @@ def render():
                 curr_price = get_safe_int(run_prog.get('price'), 0)
                 curr_seats = get_safe_int(run_prog.get('seats_available'), 1)
                 curr_batch = get_safe_int(run_prog.get('batch_size'), 1)
+
                 
                 with st.form("update_running_form"):
                     col_r1, col_r2 = st.columns(2)
@@ -192,9 +193,9 @@ def render():
                     mod_start = col_r1.date_input("Course start date", value=curr_start)
                     mod_skills = col_r2.text_input("Skills", value=str(run_prog.get('skills', '')))
                     mod_link = col_r2.text_input("Class Link", value=str(run_prog.get('class_link', '')))
-                    mod_price = col_r2.number_input("Price (INR)", min_value=0, value=int(run_prog.get('price', 0) or 0))
-                    mod_seats = col_r1.number_input("Seats Available", min_value=1, value=int(run_prog.get('seats_available', 1) or 1))
-                    mod_batch = col_r2.number_input("Planned Batch Size", min_value=1, value=int(run_prog.get('batch_size', 1) or 1))
+                    mod_price = col_r2.number_input("Price (INR)", min_value=0, value=curr_price)
+                    mod_seats = col_r1.number_input("Seats Available", min_value=1, value=curr_seats)
+                    mod_batch = col_r2.number_input("Planned Batch Size", min_value=1, value=curr_batch)
                     mod_coord = col_r1.text_input("Event Co-ordinator", value=str(run_prog.get('Event_Co_ordinator', '')))
                     mod_trainer = col_r2.text_input("Expert Trainer", value=str(run_prog.get('Expert_Trainer', '')))
                 
@@ -214,6 +215,37 @@ def render():
                         st.cache_data.clear()
                         st.success(f"Program ID {sel_run_id} updated successfully!")
                         st.rerun()
+
+                
+                # with st.form("update_running_form"):
+                #     col_r1, col_r2 = st.columns(2)
+                #     mod_name = col_r1.text_input("Course Name", value=str(run_prog.get('name', '')))
+                #     mod_duration = col_r1.text_input("Duration", value=str(run_prog.get('duration', '')))
+                #     mod_start = col_r1.date_input("Course start date", value=curr_start)
+                #     mod_skills = col_r2.text_input("Skills", value=str(run_prog.get('skills', '')))
+                #     mod_link = col_r2.text_input("Class Link", value=str(run_prog.get('class_link', '')))
+                #     mod_price = col_r2.number_input("Price (INR)", min_value=0, value=int(run_prog.get('price', 0) or 0))
+                #     mod_seats = col_r1.number_input("Seats Available", min_value=1, value=int(run_prog.get('seats_available', 1) or 1))
+                #     mod_batch = col_r2.number_input("Planned Batch Size", min_value=1, value=int(run_prog.get('batch_size', 1) or 1))
+                #     mod_coord = col_r1.text_input("Event Co-ordinator", value=str(run_prog.get('Event_Co_ordinator', '')))
+                #     mod_trainer = col_r2.text_input("Expert Trainer", value=str(run_prog.get('Expert_Trainer', '')))
+                
+                #     if st.form_submit_button("Update Program"):
+                #         update_data("programs_running", "id", sel_run_id, {
+                #             "name": mod_name,
+                #             "duration": mod_duration,
+                #             "skills": mod_skills,
+                #             "class_link": mod_link,
+                #             "start_date": mod_start.isoformat(),
+                #             "price": mod_price,
+                #             "seats_available": mod_seats,
+                #             "batch_size": mod_batch,
+                #             "Event_Co_ordinator": mod_coord,
+                #             "Expert_Trainer": mod_trainer
+                #         })
+                #         st.cache_data.clear()
+                #         st.success(f"Program ID {sel_run_id} updated successfully!")
+                #         st.rerun()
     
     with tab3:
         st.subheader("Program Coordinators")
