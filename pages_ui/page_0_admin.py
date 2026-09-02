@@ -3,7 +3,7 @@ import datetime
 import streamlit as st
 import pandas as pd
 from utils.db_helper import fetch_data, insert_data, update_data
-from utils.helper_func import admin_filter
+from utils.helper_func import admin_filter,get_safe_int
 
 
 def render():
@@ -181,6 +181,9 @@ def render():
                     curr_start = datetime.date.fromisoformat(str(run_prog.get('start_date', today.isoformat()))) if pd.notna(run_prog.get('start_date')) else today
                 except Exception:
                     curr_start = today
+                curr_price = get_safe_int(run_prog.get('price'), 0)
+                curr_seats = get_safe_int(run_prog.get('seats_available'), 1)
+                curr_batch = get_safe_int(run_prog.get('batch_size'), 1)
                 
                 with st.form("update_running_form"):
                     col_r1, col_r2 = st.columns(2)
