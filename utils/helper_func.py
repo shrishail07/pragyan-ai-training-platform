@@ -21,3 +21,13 @@ def admin_filter(
         trainers_data = trainers_data[trainers_data["status"] == fil_by_status]
 
     return trainers_data
+
+
+# Safe integer extraction to prevent NaN ValueErrors
+def get_safe_int(val, default_val=0):
+    try:
+      if pd.isna(val) or str(val).strip() == "":
+        return default_val
+      return int(float(val))
+    except (ValueError, TypeError):
+                    return default_val
