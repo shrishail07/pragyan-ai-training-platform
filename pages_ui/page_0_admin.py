@@ -125,6 +125,8 @@ def render():
                 })
                 st.success("Running Program Added!")
                 
+        # Display the currently running program        
+        st.info("Currently Running Programs")        
         running_data = fetch_data("programs_running")
         if running_data:
             st.dataframe(pd.DataFrame(running_data))
