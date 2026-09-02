@@ -27,8 +27,8 @@ def render():
             batch = col2.number_input("Planned Batch Size", min_value=1)
             co_ordinator = col1.text_input("Event Co-ordinator")
             expert_trainer = col2.text_input("Expert Trainer")
-            start_date = col1.text_input("Event start date")
-            start_year = col2.text_input("Event start year")
+            start_date = col1.date_input("Event start date")
+            start_year = col2.number_input("Event start year")
             
             if st.form_submit_button("Commit Changes"):
                 insert_data("programs_planned", {
