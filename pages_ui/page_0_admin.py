@@ -39,7 +39,7 @@ def render():
                     "name": name, "skill_dept": skill, "duration_hrs": duration, 
                     "start_month": month, "time_slot": time, "price": price, 
                     "seats_available": seats, "batch_size": batch, "Event_Co_ordinator" :co_ordinator,
-                    "Expert_Trainer":expert_trainer, "start_date":start_date, "start_year":start_year
+                    "Expert_Trainer":expert_trainer, "start_date":start_date.isoformat(), "start_year":int(start_year)
                 })
                 st.success("Program Added!")
                 
