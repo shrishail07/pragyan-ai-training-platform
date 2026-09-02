@@ -99,13 +99,29 @@ def render():
         st.subheader("Manage Running Programs")
         with st.form("add_running"):
             col1, col2 = st.columns(2)
-            name = col1.text_input("Course Name")
-            duration = col1.text_input("Duration")
-            skills = col2.text_input("Skills")
-            link = col2.text_input("Class Link")
+            name       = col1.text_input("Course Name")
+            duration   = col1.text_input("Duration")
+            start_date = col1.date_input("Course start date")
+            skills     = col2.text_input("Skills")
+            link       = col2.text_input("Class Link")
+            price      = col2.number_input("Price (INR)", min_value=0)
+            seats      = col1.number_input("Seats Available", min_value=1)
+            batch      = col2.number_input("Planned Batch Size", min_value=1)
+            co_ordinator   = col1.text_input("Event Co-ordinator")
+            expert_trainer = col2.text_input("Expert Trainer")
+            
             if st.form_submit_button("Commit Changes"):
                 insert_data("programs_running", {
-                    "name": name, "duration": duration, "skills": skills, "class_link": link
+                    "name": name, 
+                    "duration": duration, 
+                    "skills": skills, 
+                    "class_link": link,
+                    "start_date":start_date.isoformat(),
+                    "price": price, 
+                    "seats_available": seats, 
+                    "batch_size": batch, 
+                    "Event_Co_ordinator" :co_ordinator,
+                    "Expert_Trainer":expert_trainer
                 })
                 st.success("Running Program Added!")
                 
