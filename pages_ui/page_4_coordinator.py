@@ -151,29 +151,29 @@
 #             else:
 #                 st.warning("Your profile is currently pending approval from the Admin.")
 
-
 import streamlit as st
 import pandas as pd
 import json
+import time
 import PyPDF2
-from datetime import date
 from utils.db_helper import fetch_data, insert_data, update_data
 from langchain_groq import ChatGroq
 from langchain_core.prompts import PromptTemplate
 
-def extract_modules_with_groq(text):
+# 1. Syllabus Extraction
+def extract_content_with_groq(text):
     safe_text = text[:15000]
     llm = ChatGroq(model="llama3-8b-8192", temperature=0, api_key=st.secrets["GROQ_API_KEY"])
     
     prompt = PromptTemplate.from_template(
         "You are an AI curriculum assistant. Extract details from the text below.\n"
-        "Return strictly a valid JSON object with these exact keys: 'program_name', 'skills', and 'modules'.\n"
-        "'modules' must be a list of objects, each containing: 'module_name' (string), 'sessions_count' (integer), and 'content' (string summarising topics).\n"
-        "Do not include markdown blocks like ```json. Return ONLY raw JSON.\n\n"
+        "Return strictly a valid JSON object with these exact keys: 'program_name', 'skills' (comma separated), 'full_syllabus'.\n"
+        "CRITICAL INSTRUCTION FOR 'full_syllabus': Format the content strictly as a detailed schedule.\n"
+        "Do not include markdown blocks like ```json or any other surrounding text. Return ONLY the raw JSON object.\n\n"
         "Text:\n{text}"
     )
-    chain = prompt | llm
     
+    chain = prompt | llm
     try:
         response = chain.invoke({"text": safe_text})
         content = response.content.strip()
@@ -181,37 +181,63 @@ def extract_modules_with_groq(text):
         elif content.startswith("```"): content = content[3:-3]
         return json.loads(content.strip())
     except Exception as e:
-        st.error(f"Module Extraction Failed: {str(e)}")
+        st.error(f"Groq Extraction Failed: {str(e)}")
         return None
 
-def generate_notes_with_groq(module_name, content):
-    llm = ChatGroq(model="groq/compound", temperature=0.2, api_key=st.secrets["GROQ_API_KEY"])
+# 2. Module Generation
+def generate_modules_with_groq(syllabus_text):
+    safe_text = syllabus_text[:15000]
+    llm = ChatGroq(model="llama3-8b-8192", temperature=0.2, api_key=st.secrets["GROQ_API_KEY"])
+    
     prompt = PromptTemplate.from_template(
-        "You are an AI educator. Create comprehensive notes for this module: {module_name}.\n"
-        "Based on these topics: {content}\n"
-        "Return strictly a valid JSON object with these keys: 'pre_class', 'class_notes', 'post_class'.\n"
-        "Do not include markdown blocks like ```json. Return ONLY raw JSON."
+        "You are an expert technical curriculum designer. Analyze the following syllabus and break it down into logical Modules.\n"
+        "Return STRICTLY a JSON ARRAY of objects. Each object must have these exact keys: 'module_name' (string), 'sessions_count' (integer), and 'content' (string - a 2 sentence summary of what is covered).\n"
+        "Do not include markdown blocks or any other text. Output only the JSON array.\n\n"
+        "Syllabus:\n{text}"
     )
+    
     chain = prompt | llm
     try:
-        response = chain.invoke({"module_name": module_name, "content": content})
-        res_text = response.content.strip()
-        if res_text.startswith("```json"): res_text = res_text[7:-3]
-        elif res_text.startswith("```"): res_text = res_text[3:-3]
-        return json.loads(res_text.strip())
+        response = chain.invoke({"text": safe_text})
+        content = response.content.strip()
+        if content.startswith("```json"): content = content[7:-3]
+        elif content.startswith("```"): content = content[3:-3]
+        return json.loads(content.strip())
     except Exception as e:
-        st.error(f"Notes Generation Failed: {str(e)}")
+        st.error(f"Module Generation Failed: {str(e)}")
         return None
+
+# 3. Notes Generation
+def generate_notes_with_groq(module_name, module_content):
+    llm = ChatGroq(model="llama3-8b-8192", temperature=0.4, api_key=st.secrets["GROQ_API_KEY"])
+    
+    prompt = PromptTemplate.from_template(
+        "You are an expert educator. Create comprehensive study notes for a module titled '{module_name}'.\n"
+        "Context about the module: {content}\n\n"
+        "Return STRICTLY a JSON object with these exact keys:\n"
+        "- 'pre_class': Things students should read or prepare before the session.\n"
+        "- 'class_notes': Key concepts, definitions, and main topics to cover during the session.\n"
+        "- 'post_class': Homework, assignments, or revision topics.\n"
+        "Do not include markdown blocks or any other text. Output only the raw JSON object."
+    )
+    
+    chain = prompt | llm
+    try:
+        response = chain.invoke({"module_name": module_name, "content": module_content})
+        content = response.content.strip()
+        if content.startswith("```json"): content = content[7:-3]
+        elif content.startswith("```"): content = content[3:-3]
+        return json.loads(content.strip())
+    except Exception as e:
+        return {"pre_class": "Failed to generate.", "class_notes": "Failed to generate.", "post_class": "Failed to generate."}
 
 def render():
     st.title("🤝 Program Coordinator Portal")
     
-    if "draft_modules" not in st.session_state:
-        st.session_state.draft_modules = None
-    if "generated_notes" not in st.session_state:
-        st.session_state.generated_notes = {}
-
-    tab1, tab2 = st.tabs(["Submit Details", "My Assigned Events & Modules"])
+    if "draft_syllabus" not in st.session_state:
+        st.session_state.draft_syllabus = None
+        
+    tab1, tab2 = st.tabs(["Submit Details", "My Assigned Events & Syllabi"])
     
     with tab1:
         st.subheader("Submit Coordinator Profile")
@@ -228,14 +254,14 @@ def render():
             
             if st.form_submit_button("Submit Details"):
                 insert_data("coordinators", {
-                    "name": name, "email": email, "phone": phone, "experience": exp, 
-                    "cv_link": cv, "linkedin": linkedin, "github": github, 
-                    "emp_id": emp_id, "status": "Pending", "program_name": "Unassigned"
+                    "name": name, "email": email, "phone": phone,
+                    "experience": exp, "cv_link": cv, "linkedin": linkedin,
+                    "github": github, "emp_id": emp_id, "status": "Pending", "program_name": "Unassigned"
                 })
+                st.cache_data.clear()
                 st.success("Profile submitted to Pragyan AI Admin for approval!")
                 
     with tab2:
-        st.subheader("My Assigned Events")
         all_coords = fetch_data("coordinators")
         my_profile = [c for c in (all_coords or []) if c.get('email') == st.session_state.get('user_email')]
         
@@ -268,124 +294,137 @@ def render():
                         assigned_program_names.extend(my_running['name'].tolist())
                 
                 st.divider()
-                st.subheader("1. Extract Modules from Syllabus")
+                st.subheader("1. Upload & Generate AI Syllabus")
                 
                 if assigned_program_names:
                     sel_prog = st.selectbox("Select Program to Generate Syllabus:", list(set(assigned_program_names)))
                     uploaded_file = st.file_uploader("Upload PDF Syllabus Draft", type=["pdf"])
                     
-                    if st.button("Extract Modules") and uploaded_file is not None:
-                        with st.spinner("Analyzing document and structuring modules via Groq..."):
+                    if st.button("Generate Draft Syllabus") and uploaded_file is not None:
+                        with st.spinner("Extracting curriculum via Groq LLM..."):
                             pdf_reader = PyPDF2.PdfReader(uploaded_file)
                             raw_text = "".join(page.extract_text() for page in pdf_reader.pages if page.extract_text())
                             
-                            ai_data = extract_modules_with_groq(raw_text)
-                            if ai_data and 'modules' in ai_data:
-                                # Prepare data for the editor grid
-                                mod_list = []
-                                for m in ai_data['modules']:
-                                    mod_list.append({
-                                        "Module Name": m.get("module_name", ""),
-                                        "Sessions": m.get("sessions_count", 1),
-                                        "Date": date.today().isoformat(),
-                                        "Status": "Not Active",
-                                        "Class Link": "",
-                                        "Content": m.get("content", "")
-                                    })
-                                st.session_state.draft_modules = pd.DataFrame(mod_list)
+                            ai_data = extract_content_with_groq(raw_text)
+                            if ai_data:
+                                st.session_state.draft_syllabus = ai_data
                                 st.rerun()
-
-                    if st.session_state.draft_modules is not None:
-                        st.info("📝 Configure the modules below. Set dates, status, and class links, then save.")
+                                
+                    if st.session_state.draft_syllabus:
+                        st.info("📝 Review and modify the AI-generated schedule before publishing.")
+                        draft = st.session_state.draft_syllabus
                         
-                        edited_df = st.data_editor(
-                            st.session_state.draft_modules,
-                            column_config={
-                                "Status": st.column_config.SelectboxColumn("Status", options=["Active", "Not Active"]),
-                                "Date": st.column_config.DateColumn("Date")
-                            },
-                            num_rows="dynamic",
-                            use_container_width=True
-                        )
-                        
-                        if st.button("Save Modules to Database"):
-                            for _, row in edited_df.iterrows():
-                                insert_data("program_modules", {
+                        with st.form("finalize_syllabus_form"):
+                            mod_skills = st.text_input("Extracted Skills", value=str(draft.get('skills', '')))
+                            mod_syllabus = st.text_area("Hour-by-Hour Schedule", value=str(draft.get('full_syllabus', '')), height=400)
+                            
+                            if st.form_submit_button("Publish Final Syllabus"):
+                                insert_data("program_syllabi", {
                                     "program_name": sel_prog,
                                     "coordinator_name": my_name,
-                                    "module_name": row["Module Name"],
-                                    "sessions_count": int(row["Sessions"]),
-                                    "module_date": str(row["Date"]),
-                                    "status": row["Status"],
-                                    "class_link": row["Class Link"],
-                                    "content": row["Content"]
+                                    "extracted_skills": mod_skills,
+                                    "full_syllabus": mod_syllabus
                                 })
-                            st.session_state.draft_modules = None
-                            st.cache_data.clear()
-                            st.success("Modules officially saved!")
-                            st.rerun()
-                            
+                                st.session_state.draft_syllabus = None
+                                st.cache_data.clear()
+                                st.success(f"Syllabus for {sel_prog} successfully published!")
+                                st.rerun()
+
                 st.divider()
-                st.subheader("2. Manage Active Modules & AI Class Notes")
+                st.subheader("2. AI Module Planning & Note Generation")
                 
-                db_modules = fetch_data("program_modules")
-                if db_modules:
-                    mod_df = pd.DataFrame(db_modules)
-                    my_mods = mod_df[(mod_df['program_name'] == sel_prog) & (mod_df['coordinator_name'] == my_name)]
+                if assigned_program_names:
+                    mod_prog_select = st.selectbox("Select Program to Manage Modules:", list(set(assigned_program_names)), key="mod_planner_select")
                     
-                    if not my_mods.empty:
-                        for _, mod in my_mods.iterrows():
-                            mod_id = mod['id']
-                            with st.expander(f"📦 {mod['module_name']} (Status: {mod['status']}) - Date: {mod['module_date']}"):
-                                st.write(f"**Sessions:** {mod['sessions_count']} | **Link:** {mod['class_link']}")
-                                st.write(f"**Topics:** {mod['content']}")
-                                
-                                # Check for existing notes
-                                all_notes = fetch_data("module_notes")
-                                existing_note = [n for n in (all_notes or []) if n.get('module_id') == mod_id]
-                                
-                                if not existing_note and mod_id not in st.session_state.generated_notes:
-                                    if st.button(f"Generate AI Notes for {mod['module_name']}", key=f"btn_gen_{mod_id}"):
-                                        with st.spinner("Generating Pre/Post/Class notes..."):
-                                            notes = generate_notes_with_groq(mod['module_name'], mod['content'])
-                                            if notes:
-                                                st.session_state.generated_notes[mod_id] = notes
-                                                st.rerun()
-                                
-                                # Setup active form data
-                                note_data = None
-                                is_update = False
-                                
-                                if existing_note:
-                                    note_data = existing_note[0]
-                                    is_update = True
-                                elif mod_id in st.session_state.generated_notes:
-                                    note_data = st.session_state.generated_notes[mod_id]
-                                
-                                if note_data:
-                                    with st.form(f"form_notes_{mod_id}"):
-                                        pre_val = st.text_area("Pre-Class Notes", value=note_data.get('pre_class', ''))
-                                        class_val = st.text_area("Class Notes", value=note_data.get('class_notes', ''))
-                                        post_val = st.text_area("Post-Class Notes", value=note_data.get('post_class', ''))
-                                        
-                                        if st.form_submit_button("Save Notes"):
-                                            if is_update:
-                                                update_data("module_notes", "id", note_data['id'], {
-                                                    "pre_class": pre_val, "class_notes": class_val, "post_class": post_val
-                                                })
-                                            else:
-                                                insert_data("module_notes", {
-                                                    "module_id": mod_id, "pre_class": pre_val, 
-                                                    "class_notes": class_val, "post_class": post_val
-                                                })
-                                                # Remove from memory once saved
-                                                if mod_id in st.session_state.generated_notes:
-                                                    del st.session_state.generated_notes[mod_id]
-                                            
-                                            st.cache_data.clear()
-                                            st.success("Notes successfully saved and published!")
-                                            st.rerun()
+                    # Ensure syllabus is published first
+                    syllabi = fetch_data("program_syllabi")
+                    my_syl = [s for s in (syllabi or []) if s.get('program_name') == mod_prog_select]
+                    
+                    if not my_syl:
+                        st.warning("⚠️ You must generate and publish a Syllabus (Step 1) before creating modules.")
                     else:
-                        st.info("No modules saved for this program yet.")
+                        all_modules = fetch_data("program_modules")
+                        prog_modules = [m for m in (all_modules or []) if m.get('program_name') == mod_prog_select]
+                        
+                        # --- GENERATE MODULES ---
+                        if not prog_modules:
+                            st.info("No modules currently exist for this program.")
+                            if st.button("🧠 AI: Generate Modules from Syllabus"):
+                                with st.spinner("Breaking syllabus down into structured modules..."):
+                                    ai_modules = generate_modules_with_groq(my_syl[-1]['full_syllabus'])
+                                    if ai_modules:
+                                        for mod in ai_modules:
+                                            insert_data("program_modules", {
+                                                "program_name": mod_prog_select,
+                                                "coordinator_name": my_name,
+                                                "module_name": str(mod.get("module_name", "Untitled")),
+                                                "sessions_count": int(mod.get("sessions_count", 1)),
+                                                "module_date": "",
+                                                "status": "Inactive",
+                                                "class_link": "",
+                                                "content": str(mod.get("content", ""))
+                                            })
+                                        st.cache_data.clear()
+                                        st.success("Modules structured successfully!")
+                                        st.rerun()
+                        else:
+                            st.success(f"{len(prog_modules)} Modules Found. Manage schedule and notes below:")
+                            
+                            all_notes = fetch_data("module_notes")
+                            
+                            for m in prog_modules:
+                                with st.expander(f"📦 {m['module_name']} | Sessions: {m['sessions_count']} | Status: {m.get('status', 'Inactive')}"):
+                                    
+                                    # Form to update Module Details (Dates, Status, Links)
+                                    with st.form(f"update_mod_{m['id']}"):
+                                        c1, c2, c3 = st.columns(3)
+                                        mod_date = c1.text_input("Module Date (YYYY-MM-DD or Text)", value=str(m.get('module_date', '')))
+                                        status_opts = ["Inactive", "Active (Running)", "Completed"]
+                                        curr_stat_idx = status_opts.index(m.get('status')) if m.get('status') in status_opts else 0
+                                        mod_stat = c2.selectbox("Status", status_opts, index=curr_stat_idx)
+                                        mod_link = c3.text_input("Class Link", value=str(m.get('class_link', '')))
+                                        
+                                        if st.form_submit_button("Update Module Info"):
+                                            update_data("program_modules", "id", m['id'], {
+                                                "module_date": mod_date, "status": mod_stat, "class_link": mod_link
+                                            })
+                                            st.cache_data.clear()
+                                            st.success("Module updated!")
+                                            st.rerun()
+                                            
+                                    st.write("---")
+                                    st.write("**AI Deep Notes Generation**")
+                                    
+                                    # Fetch existing notes for this specific module
+                                    mod_notes = [n for n in (all_notes or []) if n.get('module_id') == m['id']]
+                                    
+                                    if not mod_notes:
+                                        if st.button("Generate Pre/Post/Class Notes", key=f"gen_notes_{m['id']}"):
+                                            with st.spinner(f"Drafting notes for {m['module_name']}..."):
+                                                ai_notes = generate_notes_with_groq(m['module_name'], m['content'])
+                                                insert_data("module_notes", {
+                                                    "module_id": m['id'],
+                                                    "pre_class": ai_notes.get('pre_class', ''),
+                                                    "class_notes": ai_notes.get('class_notes', ''),
+                                                    "post_class": ai_notes.get('post_class', '')
+                                                })
+                                                st.cache_data.clear()
+                                                st.rerun()
+                                    else:
+                                        current_note = mod_notes[-1]
+                                        with st.form(f"update_notes_{m['id']}"):
+                                            pre_n = st.text_area("Pre-Class Notes", value=str(current_note.get('pre_class', '')), height=150)
+                                            in_n = st.text_area("In-Class Notes", value=str(current_note.get('class_notes', '')), height=150)
+                                            post_n = st.text_area("Post-Class Notes", value=str(current_note.get('post_class', '')), height=150)
+                                            
+                                            if st.form_submit_button("Save Notes Updates"):
+                                                update_data("module_notes", "id", current_note['id'], {
+                                                    "pre_class": pre_n, "class_notes": in_n, "post_class": post_n
+                                                })
+                                                st.cache_data.clear()
+                                                st.success("Notes saved successfully!")
+                                                st.rerun()
+                else:
+                    st.info("You must be assigned to a program by the Admin before managing modules.")
             else:
                 st.warning("Your profile is currently pending approval from the Admin.")
