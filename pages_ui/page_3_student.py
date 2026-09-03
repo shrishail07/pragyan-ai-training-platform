@@ -102,17 +102,17 @@ def render():
             else:
                 st.info("You haven't joined any programs yet.")
         else:
-            st.info("You haven't joined any programs yet.")
-            
-    # with tab5:
-    #     st.subheader("Currently Running Programs")
-    #     running_data = fetch_data("programs_running")
-    #     running = pd.DataFrame(running_data)
+        st.info("You haven't joined any programs yet.")
+        st.subheader("Currently Running Programs")
+        running_data = fetch_data("programs_running")
+        running = pd.DataFrame(running_data)
         
-    #     if not running.empty:
-    #         st.dataframe(running)
-    #     else:
-    #         st.info("No programs are currently running.")
+        if not running.empty:
+            st.dataframe(running)
+        else:
+            st.info("No programs are currently running.")
+
+    
     with tab5:
         st.subheader("Currently Running Programs")
         running_data = fetch_data("programs_running")
