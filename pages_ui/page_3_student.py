@@ -107,11 +107,7 @@ def render():
         st.info("Currently Running Programs")
         running_data = fetch_data("programs_running")
         running = pd.DataFrame(running_data)
-        
-        if not running.empty:
-            st.dataframe(running)
-        else:
-            st.info("No programs are currently running.")
+        st.dataframe(running)
 
     
     with tab5:
