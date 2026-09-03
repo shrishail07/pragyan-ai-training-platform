@@ -135,7 +135,7 @@ def extract_content_with_groq(text):
     safe_text = text[:15000]
     
     # Initialize LangChain Groq model
-    llm = ChatGroq(model="llama3-8b-8192", temperature=0, api_key=st.secrets["GROQ_API_KEY"])
+    llm = ChatGroq(model="openai/gpt-oss-20b", temperature=0, api_key=st.secrets["GROQ_API_KEY"])
     
     prompt = PromptTemplate.from_template(
         "You are an AI curriculum assistant. Extract details from the text below.\n"
