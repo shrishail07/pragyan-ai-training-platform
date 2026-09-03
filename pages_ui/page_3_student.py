@@ -126,12 +126,12 @@ def render():
             planned = pd.DataFrame(planned_data)
             st.dataframe(planned)
             
-            # Added a unique key="planned_join"
-            selected_prog = st.selectbox("Select Planned Program ID to Join", planned['id'].tolist(), key="planned_join")
-            if st.button("Join Planned Program"):
+            # Unique keys added to prevent duplicate widget ID errors
+            selected_planned = st.selectbox("Select Planned Program ID to Join", planned['id'].tolist(), key="join_planned_id")
+            if st.button("Join Planned Program", key="btn_join_planned"):
                 insert_data("student_enrollments", {
                     "student_email": st.session_state.user_email, 
-                    "program_id": selected_prog, 
+                    "program_id": selected_planned, 
                     "status": "Pending"
                 })
                 st.cache_data.clear()
@@ -149,12 +149,12 @@ def render():
             running = pd.DataFrame(running_data)
             st.dataframe(running)
             
-            # Added a selectbox and button for Running Programs with a unique key
-            selected_run_prog = st.selectbox("Select Running Program ID to Join", running['id'].tolist(), key="running_join")
-            if st.button("Join Running Program"):
+            # Added join interface for running programs
+            selected_running = st.selectbox("Select Running Program ID to Join", running['id'].tolist(), key="join_running_id")
+            if st.button("Join Running Program", key="btn_join_running"):
                 insert_data("student_enrollments", {
                     "student_email": st.session_state.user_email, 
-                    "program_id": selected_run_prog, 
+                    "program_id": selected_running, 
                     "status": "Pending"
                 })
                 st.cache_data.clear()
@@ -164,16 +164,13 @@ def render():
             st.warning("No running programs are available right now.")
 
     with tab4:
-        st.subheader("Programs I Joined (Enrollment Status)")
+        st.subheader("Programs I Joined")
         enrolls_data = fetch_data("student_enrollments")
         
         if enrolls_data:
             enrolls = pd.DataFrame(enrolls_data)
-            
             if not enrolls.empty:
-                # Filter to only show the logged-in student's enrollments
                 my_enrolls = enrolls[enrolls['student_email'] == st.session_state.user_email]
-                
                 if not my_enrolls.empty:
                     st.dataframe(my_enrolls)
                 else:
@@ -182,6 +179,7 @@ def render():
                 st.info("You haven't joined any programs yet.")
         else:
             st.info("You haven't joined any programs yet.")
+
     
     with tab5:
         st.subheader("Currently Running Programs")
