@@ -115,40 +115,6 @@ def render():
         else:
             st.warning("No running programs are available right now.")
 
-    
-    # with tab4:
-    #     st.subheader("Programs I Joined")
-    #     enrolls_data = fetch_data("student_enrollments")
-        
-    #     if enrolls_data:
-    #         enrolls = pd.DataFrame(enrolls_data)
-    #         my_enrolls = enrolls[enrolls['student_email'] == st.session_state.user_email]
-            
-    #         if not my_enrolls.empty:
-    #             # Fallback for older database entries missing this column
-    #             if 'program_type' not in my_enrolls.columns:
-    #                 my_enrolls['program_type'] = "Planned"
-                    
-    #             planned_enrolls = my_enrolls[my_enrolls['program_type'] == 'Planned']
-    #             running_enrolls = my_enrolls[my_enrolls['program_type'] == 'Running']
-                
-    #             st.write("**Planned Programs (Yet to start)**")
-    #             if not planned_enrolls.empty:
-    #                 st.dataframe(planned_enrolls)
-    #             else:
-    #                 st.info("You haven't joined any planned programs.")
-                    
-    #             st.write("---")
-                
-    #             st.write("**Currently Running Programs**")
-    #             if not running_enrolls.empty:
-    #                 st.dataframe(running_enrolls)
-    #             else:
-    #                 st.info("You haven't joined any running programs.")
-    #         else:
-    #             st.info("You haven't joined any programs yet.")
-    #     else:
-    #         st.info("You haven't joined any programs yet.")
 
     with tab4:
         st.subheader("Programs I Joined")
@@ -221,7 +187,7 @@ def render():
         else:
             st.info("You haven't joined any programs yet.")
 
-                st.divider()
+                #st.divider()
         st.subheader("📖 Course Syllabi & Skills")
         
         # Fetch the syllabi published by coordinators
