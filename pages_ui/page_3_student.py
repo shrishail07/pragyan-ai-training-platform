@@ -102,7 +102,7 @@ def render():
             else:
                 st.info("You haven't joined any programs yet.")
         else:
-        st.info("You haven't joined any programs yet.")
+            st.info("You haven't joined any programs yet.")
         
         st.info("Currently Running Programs")
         running_data = fetch_data("programs_running")
