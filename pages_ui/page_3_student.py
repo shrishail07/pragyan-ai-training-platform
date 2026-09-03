@@ -220,6 +220,35 @@ def render():
                 st.info("You haven't joined any programs yet.")
         else:
             st.info("You haven't joined any programs yet.")
+
+                st.divider()
+        st.subheader("📖 Course Syllabi & Skills")
+        
+        # Fetch the syllabi published by coordinators
+        syllabi_data = fetch_data("program_syllabi")
+        
+        if syllabi_data:
+            syllabi_df = pd.DataFrame(syllabi_data)
+            
+            # Extract unique program names for the dropdown
+            available_programs = syllabi_df['program_name'].dropna().unique().tolist()
+            
+            if available_programs:
+                selected_prog = st.selectbox("Select a Program to view its Syllabus:", available_programs)
+                
+                # Get the latest syllabus for the selected program
+                prog_syllabus = syllabi_df[syllabi_df['program_name'] == selected_prog].iloc[-1]
+                
+                with st.container(border=True):
+                    st.write(f"**Coordinator:** {prog_syllabus.get('coordinator_name', 'N/A')}")
+                    st.write(f"**Target Skills:** {prog_syllabus.get('extracted_skills', 'N/A')}")
+                    st.write("**Full Hour-by-Hour Syllabus:**")
+                    # Using markdown/text area for clean display of multi-line schedules
+                    st.markdown(prog_syllabus.get('full_syllabus', 'No detailed syllabus provided.'))
+            else:
+                st.info("No programs with published syllabi found.")
+        else:
+            st.info("No curriculum data has been published by the coordinators yet.")
     
     with tab5:
         st.subheader("Currently Running Programs")
