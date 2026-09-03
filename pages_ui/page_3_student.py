@@ -187,7 +187,7 @@ def render():
     #     else:
     #         st.info("You haven't joined any programs yet.")
 
-    #             #st.divider()
+    #     st.divider()
     #     st.subheader("📖 Course Syllabi & Skills")
         
     #     # Fetch the syllabi published by coordinators
@@ -200,7 +200,8 @@ def render():
     #         available_programs = syllabi_df['program_name'].dropna().unique().tolist()
             
     #         if available_programs:
-    #             selected_prog = st.selectbox("Select a Program to view its Syllabus:", available_programs)
+    #             # ADDED KEY HERE to fix the Duplicate ID Error
+    #             selected_prog = st.selectbox("Select a Program to view its Syllabus:", available_programs, key="syllabus_view_select")
                 
     #             # Get the latest syllabus for the selected program
     #             prog_syllabus = syllabi_df[syllabi_df['program_name'] == selected_prog].iloc[-1]
@@ -209,17 +210,17 @@ def render():
     #                 st.write(f"**Coordinator:** {prog_syllabus.get('coordinator_name', 'N/A')}")
     #                 st.write(f"**Target Skills:** {prog_syllabus.get('extracted_skills', 'N/A')}")
     #                 st.write("**Full Hour-by-Hour Syllabus:**")
-    #                 # Using markdown/text area for clean display of multi-line schedules
     #                 st.markdown(prog_syllabus.get('full_syllabus', 'No detailed syllabus provided.'))
     #         else:
     #             st.info("No programs with published syllabi found.")
     #     else:
     #         st.info("No curriculum data has been published by the coordinators yet.")
 
-
     with tab4:
         st.subheader("Programs I Joined")
         enrolls_data = fetch_data("student_enrollments")
+        
+        joined_program_names = [] # This will store the names of programs the student has access to
         
         if enrolls_data:
             enrolls = pd.DataFrame(enrolls_data)
@@ -254,6 +255,9 @@ def render():
                         ).drop(columns=['id_str', 'program_id'])
                         
                         st.dataframe(my_planned_full)
+                        
+                        # Add these program names to the student's access list
+                        joined_program_names.extend(my_planned_full['name'].dropna().unique().tolist())
                     else:
                         st.info("Program details are currently unavailable.")
                 else:
@@ -279,6 +283,9 @@ def render():
                         ).drop(columns=['id_str', 'program_id'])
                         
                         st.dataframe(my_running_full)
+                        
+                        # Add these program names to the student's access list
+                        joined_program_names.extend(my_running_full['name'].dropna().unique().tolist())
                     else:
                         st.info("Program details are currently unavailable.")
                 else:
@@ -289,33 +296,69 @@ def render():
             st.info("You haven't joined any programs yet.")
 
         st.divider()
-        st.subheader("📖 Course Syllabi & Skills")
+        st.subheader("📖 My Course Syllabi & Module Notes")
         
-        # Fetch the syllabi published by coordinators
-        syllabi_data = fetch_data("program_syllabi")
-        
-        if syllabi_data:
-            syllabi_df = pd.DataFrame(syllabi_data)
+        # Only show the syllabus/notes section if the student has joined at least one program
+        if joined_program_names:
+            unique_joined_programs = list(set(joined_program_names))
+            selected_prog = st.selectbox("Select a joined program to view details:", unique_joined_programs, key="syllabus_view_select")
             
-            # Extract unique program names for the dropdown
-            available_programs = syllabi_df['program_name'].dropna().unique().tolist()
+            # 1. Fetch & Display Syllabus
+            syllabi_data = fetch_data("program_syllabi")
+            my_syl = [s for s in (syllabi_data or []) if s.get('program_name') == selected_prog]
             
-            if available_programs:
-                # ADDED KEY HERE to fix the Duplicate ID Error
-                selected_prog = st.selectbox("Select a Program to view its Syllabus:", available_programs, key="syllabus_view_select")
-                
-                # Get the latest syllabus for the selected program
-                prog_syllabus = syllabi_df[syllabi_df['program_name'] == selected_prog].iloc[-1]
-                
+            if my_syl:
+                prog_syllabus = my_syl[-1] # Get latest
                 with st.container(border=True):
                     st.write(f"**Coordinator:** {prog_syllabus.get('coordinator_name', 'N/A')}")
                     st.write(f"**Target Skills:** {prog_syllabus.get('extracted_skills', 'N/A')}")
                     st.write("**Full Hour-by-Hour Syllabus:**")
                     st.markdown(prog_syllabus.get('full_syllabus', 'No detailed syllabus provided.'))
             else:
-                st.info("No programs with published syllabi found.")
+                st.info("The coordinator has not published the syllabus for this program yet.")
+            
+            st.write("---")
+            st.subheader("📚 Module-Wise Notes & Class Links")
+            
+            # 2. Fetch & Display Modules and Notes
+            modules_data = fetch_data("program_modules")
+            notes_data = fetch_data("module_notes")
+            
+            prog_modules = [m for m in (modules_data or []) if m.get('program_name') == selected_prog]
+            
+            if prog_modules:
+                for mod in prog_modules:
+                    # Create an expander for each module
+                    with st.expander(f"📦 {mod.get('module_name', 'Untitled')} | Status: {mod.get('status', 'Inactive')} | Date: {mod.get('module_date', 'TBD')}"):
+                        st.write(f"**Sessions:** {mod.get('sessions_count', 1)}")
+                        
+                        # Show class link if provided
+                        class_url = mod.get('class_link', '')
+                        if class_url and class_url.strip() != "":
+                            st.markdown(f"**🔗 Live Class Link:** [{class_url}]({class_url})")
+                        
+                        st.write(f"**Module Summary:** {mod.get('content', '')}")
+                        
+                        st.write("---")
+                        # Match notes to this specific module ID
+                        mod_notes = [n for n in (notes_data or []) if n.get('module_id') == mod['id']]
+                        
+                        if mod_notes:
+                            note = mod_notes[-1] # Get latest generated notes
+                            st.write("**📝 Pre-Class Preparation:**")
+                            st.info(note.get('pre_class', 'No pre-class notes provided.'))
+                            
+                            st.write("**📝 In-Class Topics & Notes:**")
+                            st.success(note.get('class_notes', 'No in-class notes provided.'))
+                            
+                            st.write("**📝 Post-Class Revision & Homework:**")
+                            st.warning(note.get('post_class', 'No post-class notes provided.'))
+                        else:
+                            st.info("AI Notes for this module have not been generated by the coordinator yet.")
+            else:
+                st.info("No structured modules exist for this program yet.")
         else:
-            st.info("No curriculum data has been published by the coordinators yet.")
+            st.info("Join a program in Tab 3 to unlock syllabi, module notes, and class links here.")
     
     with tab5:
         st.subheader("Currently Running Programs")
