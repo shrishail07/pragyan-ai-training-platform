@@ -89,6 +89,11 @@ def render():
                 st.success("Join request sent to Admin!")
         else:
             st.info("No planned programs are available right now.")
+
+        running_data = fetch_data("programs_running")
+        running = pd.DataFrame(running_data)
+        st.info("Currently Running Programs")
+        st.dataframe(running)
             
     with tab4:
         st.subheader("Programs I Joined (Yet to start)")
@@ -103,11 +108,6 @@ def render():
                 st.info("You haven't joined any programs yet.")
         else:
             st.info("You haven't joined any programs yet.")
-        
-        st.info("Currently Running Programs")
-        running_data = fetch_data("programs_running")
-        running = pd.DataFrame(running_data)
-        st.dataframe(running)
 
     
     with tab5:
