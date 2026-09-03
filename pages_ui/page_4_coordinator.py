@@ -185,7 +185,7 @@ def extract_modules_with_groq(text):
         return None
 
 def generate_notes_with_groq(module_name, content):
-    llm = ChatGroq(model="llama3-8b-8192", temperature=0.2, api_key=st.secrets["GROQ_API_KEY"])
+    llm = ChatGroq(model="groq/compound", temperature=0.2, api_key=st.secrets["GROQ_API_KEY"])
     prompt = PromptTemplate.from_template(
         "You are an AI educator. Create comprehensive notes for this module: {module_name}.\n"
         "Based on these topics: {content}\n"
