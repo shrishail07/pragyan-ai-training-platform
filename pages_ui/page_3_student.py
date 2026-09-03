@@ -103,7 +103,8 @@ def render():
                 st.info("You haven't joined any programs yet.")
         else:
         st.info("You haven't joined any programs yet.")
-        st.subheader("Currently Running Programs")
+        
+        st.info("Currently Running Programs")
         running_data = fetch_data("programs_running")
         running = pd.DataFrame(running_data)
         
