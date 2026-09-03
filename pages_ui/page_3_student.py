@@ -72,13 +72,37 @@ def render():
                     st.success("Proposal Accepted! Pragyan AI will schedule your class shortly.")
                     st.rerun()
 
+    # with tab3:
+    #     st.subheader("Programs in Planning Stage")
+    #     planned_data = fetch_data("programs_planned")
+    #     planned = pd.DataFrame(planned_data)
+        
+    #     if not planned.empty:
+    #         st.dataframe(planned)
+    #         selected_prog = st.selectbox("Select Program ID to Join", planned['id'].tolist())
+    #         if st.button("Join Program"):
+    #             insert_data("student_enrollments", {
+    #                 "student_email": st.session_state.user_email, 
+    #                 "program_id": selected_prog, 
+    #                 "status": "Pending"
+    #             })
+    #             st.success("Join request sent to Admin!")
+    #     else:
+    #         st.info("No planned programs are available right now.")
+
+    #     running_data = fetch_data("programs_running")
+    #     running = pd.DataFrame(running_data)
+    #     st.info("Currently Running Programs")
+    #     st.dataframe(running)
+
     with tab3:
         st.subheader("Programs in Planning Stage")
         planned_data = fetch_data("programs_planned")
-        planned = pd.DataFrame(planned_data)
         
-        if not planned.empty:
+        if planned_data:
+            planned = pd.DataFrame(planned_data)
             st.dataframe(planned)
+            
             selected_prog = st.selectbox("Select Program ID to Join", planned['id'].tolist())
             if st.button("Join Program"):
                 insert_data("student_enrollments", {
@@ -90,11 +114,17 @@ def render():
         else:
             st.info("No planned programs are available right now.")
 
-        running_data = fetch_data("programs_running")
-        running = pd.DataFrame(running_data)
+        st.divider()
+
         st.info("Currently Running Programs")
-        st.dataframe(running)
-            
+        running_data = fetch_data("programs_running")
+        
+        if running_data:
+            running = pd.DataFrame(running_data)
+            st.dataframe(running)
+        else:
+            st.warning("No running programs are available right now.")
+    
     with tab4:
         st.subheader("Programs I Joined (Yet to start)")
         enrolls_data = fetch_data("student_enrollments")
