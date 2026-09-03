@@ -116,6 +116,107 @@ def render():
             st.warning("No running programs are available right now.")
 
 
+    # with tab4:
+    #     st.subheader("Programs I Joined")
+    #     enrolls_data = fetch_data("student_enrollments")
+        
+    #     if enrolls_data:
+    #         enrolls = pd.DataFrame(enrolls_data)
+    #         my_enrolls = enrolls[enrolls['student_email'] == st.session_state.user_email]
+            
+    #         if not my_enrolls.empty:
+    #             # Fallback for older database entries missing this column
+    #             if 'program_type' not in my_enrolls.columns:
+    #                 my_enrolls['program_type'] = "Planned"
+                
+    #             # Standardize IDs to strings for accurate matching
+    #             my_enrolls['program_id'] = my_enrolls['program_id'].astype(str)
+                
+    #             joined_planned = my_enrolls[my_enrolls['program_type'] == 'Planned']
+    #             joined_running = my_enrolls[my_enrolls['program_type'] == 'Running']
+                
+    #             st.write("**Planned Programs (Yet to start)**")
+    #             if not joined_planned.empty:
+    #                 planned_data = fetch_data("programs_planned")
+    #                 if planned_data:
+    #                     planned_df = pd.DataFrame(planned_data)
+    #                     planned_df['id_str'] = planned_df['id'].astype(str)
+                        
+    #                     # Filter full table by the joined IDs
+    #                     my_planned_full = planned_df[planned_df['id_str'].isin(joined_planned['program_id'])]
+                        
+    #                     # Merge the enrollment status (Pending/Approved) to the display
+    #                     my_planned_full = my_planned_full.merge(
+    #                         joined_planned[['program_id', 'status']], 
+    #                         left_on='id_str', 
+    #                         right_on='program_id'
+    #                     ).drop(columns=['id_str', 'program_id'])
+                        
+    #                     st.dataframe(my_planned_full)
+    #                 else:
+    #                     st.info("Program details are currently unavailable.")
+    #             else:
+    #                 st.info("You haven't joined any planned programs.")
+                    
+    #             st.write("---")
+                
+    #             st.write("**Currently Running Programs**")
+    #             if not joined_running.empty:
+    #                 running_data = fetch_data("programs_running")
+    #                 if running_data:
+    #                     running_df = pd.DataFrame(running_data)
+    #                     running_df['id_str'] = running_df['id'].astype(str)
+                        
+    #                     # Filter full table by the joined IDs
+    #                     my_running_full = running_df[running_df['id_str'].isin(joined_running['program_id'])]
+                        
+    #                     # Merge the enrollment status (Pending/Approved) to the display
+    #                     my_running_full = my_running_full.merge(
+    #                         joined_running[['program_id', 'status']], 
+    #                         left_on='id_str', 
+    #                         right_on='program_id'
+    #                     ).drop(columns=['id_str', 'program_id'])
+                        
+    #                     st.dataframe(my_running_full)
+    #                 else:
+    #                     st.info("Program details are currently unavailable.")
+    #             else:
+    #                 st.info("You haven't joined any running programs.")
+    #         else:
+    #             st.info("You haven't joined any programs yet.")
+    #     else:
+    #         st.info("You haven't joined any programs yet.")
+
+    #             #st.divider()
+    #     st.subheader("📖 Course Syllabi & Skills")
+        
+    #     # Fetch the syllabi published by coordinators
+    #     syllabi_data = fetch_data("program_syllabi")
+        
+    #     if syllabi_data:
+    #         syllabi_df = pd.DataFrame(syllabi_data)
+            
+    #         # Extract unique program names for the dropdown
+    #         available_programs = syllabi_df['program_name'].dropna().unique().tolist()
+            
+    #         if available_programs:
+    #             selected_prog = st.selectbox("Select a Program to view its Syllabus:", available_programs)
+                
+    #             # Get the latest syllabus for the selected program
+    #             prog_syllabus = syllabi_df[syllabi_df['program_name'] == selected_prog].iloc[-1]
+                
+    #             with st.container(border=True):
+    #                 st.write(f"**Coordinator:** {prog_syllabus.get('coordinator_name', 'N/A')}")
+    #                 st.write(f"**Target Skills:** {prog_syllabus.get('extracted_skills', 'N/A')}")
+    #                 st.write("**Full Hour-by-Hour Syllabus:**")
+    #                 # Using markdown/text area for clean display of multi-line schedules
+    #                 st.markdown(prog_syllabus.get('full_syllabus', 'No detailed syllabus provided.'))
+    #         else:
+    #             st.info("No programs with published syllabi found.")
+    #     else:
+    #         st.info("No curriculum data has been published by the coordinators yet.")
+
+
     with tab4:
         st.subheader("Programs I Joined")
         enrolls_data = fetch_data("student_enrollments")
@@ -187,7 +288,7 @@ def render():
         else:
             st.info("You haven't joined any programs yet.")
 
-                #st.divider()
+        st.divider()
         st.subheader("📖 Course Syllabi & Skills")
         
         # Fetch the syllabi published by coordinators
@@ -200,7 +301,8 @@ def render():
             available_programs = syllabi_df['program_name'].dropna().unique().tolist()
             
             if available_programs:
-                selected_prog = st.selectbox("Select a Program to view its Syllabus:", available_programs)
+                # ADDED KEY HERE to fix the Duplicate ID Error
+                selected_prog = st.selectbox("Select a Program to view its Syllabus:", available_programs, key="syllabus_view_select")
                 
                 # Get the latest syllabus for the selected program
                 prog_syllabus = syllabi_df[syllabi_df['program_name'] == selected_prog].iloc[-1]
@@ -209,7 +311,6 @@ def render():
                     st.write(f"**Coordinator:** {prog_syllabus.get('coordinator_name', 'N/A')}")
                     st.write(f"**Target Skills:** {prog_syllabus.get('extracted_skills', 'N/A')}")
                     st.write("**Full Hour-by-Hour Syllabus:**")
-                    # Using markdown/text area for clean display of multi-line schedules
                     st.markdown(prog_syllabus.get('full_syllabus', 'No detailed syllabus provided.'))
             else:
                 st.info("No programs with published syllabi found.")
