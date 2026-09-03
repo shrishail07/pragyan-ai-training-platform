@@ -72,52 +72,6 @@ def render():
                     st.success("Proposal Accepted! Pragyan AI will schedule your class shortly.")
                     st.rerun()
 
-    # with tab3:
-    #     st.subheader("Programs in Planning Stage")
-    #     planned_data = fetch_data("programs_planned")
-        
-    #     if planned_data:
-    #         planned = pd.DataFrame(planned_data)
-    #         st.dataframe(planned)
-            
-    #         selected_prog = st.selectbox("Select Program ID to Join", planned['id'].tolist())
-    #         if st.button("Join Program"):
-    #             insert_data("student_enrollments", {
-    #                 "student_email": st.session_state.user_email, 
-    #                 "program_id": selected_prog, 
-    #                 "status": "Pending"
-    #             })
-    #             st.success("Join request sent to Admin!")
-    #     else:
-    #         st.info("No planned programs are available right now.")
-
-    #     # ALIGNMENT CHECK: These next lines must line up exactly with the 'if/else' above
-    #     st.divider()
-
-    #     st.info("Currently Running Programs")
-    #     running_data = fetch_data("programs_running")
-        
-    #     if running_data:
-    #         running = pd.DataFrame(running_data)
-    #         st.dataframe(running)
-    #     else:
-    #         st.warning("No running programs are available right now.")
-
-    
-    # with tab4:
-    #     st.subheader("Programs I Joined (Yet to start)")
-    #     enrolls_data = fetch_data("student_enrollments")
-    #     enrolls = pd.DataFrame(enrolls_data)
-        
-    #     if not enrolls.empty:
-    #         my_enrolls = enrolls[enrolls['student_email'] == st.session_state.user_email]
-    #         if not my_enrolls.empty:
-    #             st.dataframe(my_enrolls)
-    #         else:
-    #             st.info("You haven't joined any programs yet.")
-    #     else:
-    #         st.info("You haven't joined any programs yet.")
-
     with tab3:
         st.subheader("Programs in Planning Stage")
         planned_data = fetch_data("programs_planned")
@@ -162,6 +116,40 @@ def render():
             st.warning("No running programs are available right now.")
 
     
+    # with tab4:
+    #     st.subheader("Programs I Joined")
+    #     enrolls_data = fetch_data("student_enrollments")
+        
+    #     if enrolls_data:
+    #         enrolls = pd.DataFrame(enrolls_data)
+    #         my_enrolls = enrolls[enrolls['student_email'] == st.session_state.user_email]
+            
+    #         if not my_enrolls.empty:
+    #             # Fallback for older database entries missing this column
+    #             if 'program_type' not in my_enrolls.columns:
+    #                 my_enrolls['program_type'] = "Planned"
+                    
+    #             planned_enrolls = my_enrolls[my_enrolls['program_type'] == 'Planned']
+    #             running_enrolls = my_enrolls[my_enrolls['program_type'] == 'Running']
+                
+    #             st.write("**Planned Programs (Yet to start)**")
+    #             if not planned_enrolls.empty:
+    #                 st.dataframe(planned_enrolls)
+    #             else:
+    #                 st.info("You haven't joined any planned programs.")
+                    
+    #             st.write("---")
+                
+    #             st.write("**Currently Running Programs**")
+    #             if not running_enrolls.empty:
+    #                 st.dataframe(running_enrolls)
+    #             else:
+    #                 st.info("You haven't joined any running programs.")
+    #         else:
+    #             st.info("You haven't joined any programs yet.")
+    #     else:
+    #         st.info("You haven't joined any programs yet.")
+
     with tab4:
         st.subheader("Programs I Joined")
         enrolls_data = fetch_data("student_enrollments")
@@ -174,28 +162,64 @@ def render():
                 # Fallback for older database entries missing this column
                 if 'program_type' not in my_enrolls.columns:
                     my_enrolls['program_type'] = "Planned"
-                    
-                planned_enrolls = my_enrolls[my_enrolls['program_type'] == 'Planned']
-                running_enrolls = my_enrolls[my_enrolls['program_type'] == 'Running']
+                
+                # Standardize IDs to strings for accurate matching
+                my_enrolls['program_id'] = my_enrolls['program_id'].astype(str)
+                
+                joined_planned = my_enrolls[my_enrolls['program_type'] == 'Planned']
+                joined_running = my_enrolls[my_enrolls['program_type'] == 'Running']
                 
                 st.write("**Planned Programs (Yet to start)**")
-                if not planned_enrolls.empty:
-                    st.dataframe(planned_enrolls)
+                if not joined_planned.empty:
+                    planned_data = fetch_data("programs_planned")
+                    if planned_data:
+                        planned_df = pd.DataFrame(planned_data)
+                        planned_df['id_str'] = planned_df['id'].astype(str)
+                        
+                        # Filter full table by the joined IDs
+                        my_planned_full = planned_df[planned_df['id_str'].isin(joined_planned['program_id'])]
+                        
+                        # Merge the enrollment status (Pending/Approved) to the display
+                        my_planned_full = my_planned_full.merge(
+                            joined_planned[['program_id', 'status']], 
+                            left_on='id_str', 
+                            right_on='program_id'
+                        ).drop(columns=['id_str', 'program_id'])
+                        
+                        st.dataframe(my_planned_full)
+                    else:
+                        st.info("Program details are currently unavailable.")
                 else:
                     st.info("You haven't joined any planned programs.")
                     
                 st.write("---")
                 
                 st.write("**Currently Running Programs**")
-                if not running_enrolls.empty:
-                    st.dataframe(running_enrolls)
+                if not joined_running.empty:
+                    running_data = fetch_data("programs_running")
+                    if running_data:
+                        running_df = pd.DataFrame(running_data)
+                        running_df['id_str'] = running_df['id'].astype(str)
+                        
+                        # Filter full table by the joined IDs
+                        my_running_full = running_df[running_df['id_str'].isin(joined_running['program_id'])]
+                        
+                        # Merge the enrollment status (Pending/Approved) to the display
+                        my_running_full = my_running_full.merge(
+                            joined_running[['program_id', 'status']], 
+                            left_on='id_str', 
+                            right_on='program_id'
+                        ).drop(columns=['id_str', 'program_id'])
+                        
+                        st.dataframe(my_running_full)
+                    else:
+                        st.info("Program details are currently unavailable.")
                 else:
                     st.info("You haven't joined any running programs.")
             else:
                 st.info("You haven't joined any programs yet.")
         else:
             st.info("You haven't joined any programs yet.")
-
     
     with tab5:
         st.subheader("Currently Running Programs")
