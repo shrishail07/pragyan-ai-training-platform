@@ -75,7 +75,7 @@ from langchain_core.prompts import PromptTemplate
 
 def extract_content_with_groq(text):
     # Initialize LangChain Groq model
-    llm = ChatGroq(model="llama3-8b-8192", temperature=0, api_key=st.secrets["GROQ_API_KEY"])
+    llm = ChatGroq(model="openai/gpt-oss-120b", temperature=0, api_key=st.secrets["GROQ_API_KEY"])
     
     prompt = PromptTemplate.from_template(
         "You are an AI curriculum assistant. Extract details from the text below.\n"
