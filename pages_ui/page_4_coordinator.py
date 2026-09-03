@@ -73,7 +73,30 @@ from utils.db_helper import fetch_data, insert_data
 from langchain_groq import ChatGroq
 from langchain_core.prompts import PromptTemplate
 
+# def extract_content_with_groq(text):
+#     # Initialize LangChain Groq model
+#     llm = ChatGroq(model="openai/gpt-oss-120b", temperature=0, api_key=st.secrets["GROQ_API_KEY"])
+    
+#     prompt = PromptTemplate.from_template(
+#         "You are an AI curriculum assistant. Extract details from the text below.\n"
+#         "Return strictly a valid JSON object with these exact keys: 'program_name', 'skills' (comma separated), 'full_syllabus'.\n"
+#         "Do not include markdown blocks or any other text.\n\n"
+#         "Text:\n{text}"
+#     )
+    
+#     chain = prompt | llm
+#     response = chain.invoke({"text": text})
+    
+#     try:
+#         return json.loads(response.content)
+#     except Exception as e:
+#         st.error("Failed to parse the structured output from Groq.")
+#         return None
+
 def extract_content_with_groq(text):
+    # Safety truncation: Limit to ~3,500 tokens to bypass Groq rate limits
+    safe_text = text[:15000]
+    
     # Initialize LangChain Groq model
     llm = ChatGroq(model="openai/gpt-oss-120b", temperature=0, api_key=st.secrets["GROQ_API_KEY"])
     
@@ -85,13 +108,15 @@ def extract_content_with_groq(text):
     )
     
     chain = prompt | llm
-    response = chain.invoke({"text": text})
     
     try:
+        response = chain.invoke({"text": safe_text})
         return json.loads(response.content)
     except Exception as e:
-        st.error("Failed to parse the structured output from Groq.")
+        # Fallback error handling if the API still rejects or fails to parse
+        st.error(f"Groq Extraction Failed: {str(e)}")
         return None
+
 
 def render():
     st.title("🤝 Program Coordinator Portal")
