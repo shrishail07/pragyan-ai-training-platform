@@ -91,6 +91,7 @@ def render():
     #     else:
     #         st.info("No planned programs are available right now.")
 
+    #     # ALIGNMENT CHECK: These next lines must line up exactly with the 'if/else' above
     #     st.divider()
 
     #     st.info("Currently Running Programs")
@@ -101,6 +102,22 @@ def render():
     #         st.dataframe(running)
     #     else:
     #         st.warning("No running programs are available right now.")
+
+    
+    # with tab4:
+    #     st.subheader("Programs I Joined (Yet to start)")
+    #     enrolls_data = fetch_data("student_enrollments")
+    #     enrolls = pd.DataFrame(enrolls_data)
+        
+    #     if not enrolls.empty:
+    #         my_enrolls = enrolls[enrolls['student_email'] == st.session_state.user_email]
+    #         if not my_enrolls.empty:
+    #             st.dataframe(my_enrolls)
+    #         else:
+    #             st.info("You haven't joined any programs yet.")
+    #     else:
+    #         st.info("You haven't joined any programs yet.")
+
     with tab3:
         st.subheader("Programs in Planning Stage")
         planned_data = fetch_data("programs_planned")
@@ -109,18 +126,20 @@ def render():
             planned = pd.DataFrame(planned_data)
             st.dataframe(planned)
             
-            selected_prog = st.selectbox("Select Program ID to Join", planned['id'].tolist())
-            if st.button("Join Program"):
+            # Added a unique key="planned_join"
+            selected_prog = st.selectbox("Select Planned Program ID to Join", planned['id'].tolist(), key="planned_join")
+            if st.button("Join Planned Program"):
                 insert_data("student_enrollments", {
                     "student_email": st.session_state.user_email, 
                     "program_id": selected_prog, 
                     "status": "Pending"
                 })
+                st.cache_data.clear()
                 st.success("Join request sent to Admin!")
+                st.rerun()
         else:
             st.info("No planned programs are available right now.")
 
-        # ALIGNMENT CHECK: These next lines must line up exactly with the 'if/else' above
         st.divider()
 
         st.info("Currently Running Programs")
@@ -129,24 +148,40 @@ def render():
         if running_data:
             running = pd.DataFrame(running_data)
             st.dataframe(running)
+            
+            # Added a selectbox and button for Running Programs with a unique key
+            selected_run_prog = st.selectbox("Select Running Program ID to Join", running['id'].tolist(), key="running_join")
+            if st.button("Join Running Program"):
+                insert_data("student_enrollments", {
+                    "student_email": st.session_state.user_email, 
+                    "program_id": selected_run_prog, 
+                    "status": "Pending"
+                })
+                st.cache_data.clear()
+                st.success("Join request sent to Admin!")
+                st.rerun()
         else:
             st.warning("No running programs are available right now.")
 
-    
     with tab4:
-        st.subheader("Programs I Joined (Yet to start)")
+        st.subheader("Programs I Joined (Enrollment Status)")
         enrolls_data = fetch_data("student_enrollments")
-        enrolls = pd.DataFrame(enrolls_data)
         
-        if not enrolls.empty:
-            my_enrolls = enrolls[enrolls['student_email'] == st.session_state.user_email]
-            if not my_enrolls.empty:
-                st.dataframe(my_enrolls)
+        if enrolls_data:
+            enrolls = pd.DataFrame(enrolls_data)
+            
+            if not enrolls.empty:
+                # Filter to only show the logged-in student's enrollments
+                my_enrolls = enrolls[enrolls['student_email'] == st.session_state.user_email]
+                
+                if not my_enrolls.empty:
+                    st.dataframe(my_enrolls)
+                else:
+                    st.info("You haven't joined any programs yet.")
             else:
                 st.info("You haven't joined any programs yet.")
         else:
             st.info("You haven't joined any programs yet.")
-
     
     with tab5:
         st.subheader("Currently Running Programs")
