@@ -106,7 +106,7 @@ def render():
                         assigned_program_names.extend(my_running['name'].tolist())
                 
                 st.divider()
-                st.subheader("Upload & Generate AI Syllabus")
+                st.info("Upload & Generate AI Syllabus")
                 
                 if assigned_program_names:
                     sel_prog = st.selectbox("Select Program to Generate Syllabus:", list(set(assigned_program_names)))
